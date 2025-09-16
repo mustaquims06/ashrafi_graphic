@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
+import logo from "../assets/logo.png"; // ✅ fixed path
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -23,13 +24,13 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 gradient-bg shadow-md">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          {/* Logo */}
+          
+          {/* ✅ Logo Section */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold gold-text">
-              ASHROFI
-            </div>
-            <div className="text-xl font-semibold">
-              GRAPHIC
+            <img src={logo} alt="Logo" className="h-12 w-auto" />
+            <div>
+              <div className="text-2xl font-bold gold-text">ASHRAFI</div>
+              <div className="text-xl font-semibold">GRAPHIC</div>
             </div>
           </Link>
 

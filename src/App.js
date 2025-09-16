@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
+import DiscoverProjects from "./pages/DiscoverProjects";
 import ServicesPage from './pages/ServicesPage';
 import ProductsPage from './pages/ProductsPage';
 import AboutPage from './pages/AboutPage';
@@ -20,6 +21,7 @@ function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/discover-projects" element={<DiscoverProjects />} />
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/about" element={<AboutPage />} />
