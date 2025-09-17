@@ -12,7 +12,7 @@ import PartnersPage from './pages/PartnersPage';
 import BlogPage from './pages/BlogPage';
 import ContactPage from './pages/ContactPage';
 import './styles/animations.css';
-
+import WhatsAppBot from "./components/WhatsAppBot";
 function App() {
   return (
     <Router>
@@ -29,6 +29,8 @@ function App() {
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/contact" element={<ContactPage />} />
           </Routes>
+            {/* ✅ Floating WhatsApp bot visible everywhere */}
+        <WhatsAppBot />
         </main>
         <Footer />
       </div>

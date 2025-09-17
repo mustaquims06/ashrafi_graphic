@@ -16,7 +16,7 @@ const Navbar = () => {
     { name: 'Products', path: '/products' },
     { name: 'About', path: '/about' },
     { name: 'Partners', path: '/partners' },
-    { name: 'Blog', path: '/blog' },
+    
     { name: 'Contact', path: '/contact' },
   ];
 
@@ -27,7 +27,11 @@ const Navbar = () => {
           
           {/* ✅ Logo Section */}
           <Link to="/" className="flex items-center space-x-2">
-            <img src={logo} alt="Logo" className="h-12 w-auto" />
+          <img
+                  src={logo}
+                  alt="Logo"
+                  className="h-16 md:h-20 w-auto object-contain"
+                />
             <div>
               <div className="text-2xl font-bold gold-text">ASHRAFI</div>
               <div className="text-xl font-semibold">GRAPHIC</div>
