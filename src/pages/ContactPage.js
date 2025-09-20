@@ -166,17 +166,17 @@ const ContactPage = () => {
               <div>
                 <h3 className="text-lg font-semibold mb-2 gold-text">📍 Address</h3>
                 <p className="text-[var(--text-color)]">
-                  123 Design Street <br />
-                  Creative City, CC 12345
+                  Doodh Bazar <br />
+                  Nashik, MAHARASHTRA
                 </p>
               </div>
               <div>
                 <h3 className="text-lg font-semibold mb-2 gold-text">📞 Phone</h3>
-                <p className="text-[var(--text-color)]">(123) 456-7890</p>
+                <p className="text-[var(--text-color)]">(+91) 8007869205</p>
               </div>
               <div>
                 <h3 className="text-lg font-semibold mb-2 gold-text">📧 Email</h3>
-                <p className="text-[var(--text-color)]">info@ashrafigraphics.com</p>
+                <p className="text-[var(--text-color)]">ashrafigraphicservices@gmail.com</p>
               </div>
               <div>
                 <h3 className="text-lg font-semibold mb-2 gold-text">⏰ Business Hours</h3>

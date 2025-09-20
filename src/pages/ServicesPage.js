@@ -1,172 +1,226 @@
 // src/pages/ServicesPage.js
 import React, { useState } from "react";
-import ScrollAnimation from "../components/ScrollAnimation";
+import { motion, AnimatePresence } from "framer-motion";
 
-const ServicesPage = () => {
-  const [openIndex, setOpenIndex] = useState(null);
-
-  const toggleService = (i) => {
-    setOpenIndex(openIndex === i ? null : i);
-  };
-
-  const services = [
-    {
-      title: "Graphic Design",
-      summary:
-        "Creative visuals that bring your brand identity to life with design mastery.",
-      description:
-        "We specialise in posters, thumbnails, and logo design that align with your brand messaging and aesthetics.",
-      icon: "🎨",
-      subServices: [
-        {
-          name: "Poster Design",
-          desc: "Eye-catching posters tailored for events and campaigns.",
-          icon: "🖼️",
-        },
-        {
-          name: "Thumbnail Design",
-          desc: "Professional thumbnails that boost online engagement.",
-          icon: "📸",
-        },
-        {
-          name: "Logo Design",
-          desc: "Memorable logos that define your brand personality.",
-          icon: "⚜️",
-        },
-      ],
-    },
-    {
-      title: "Video Editing",
-      summary:
-        "Transform your raw footage into compelling videos that keep audiences engaged.",
-      description:
-        "From AI fast edits to high-quality marketing videos, we ensure every edit has an impact.",
-      icon: "🎬",
-      subServices: [
-        {
-          name: "AI Editing",
-          desc: "Fast AI-driven edits for quick content delivery.",
-          icon: "🤖",
-        },
-        {
-          name: "Short Video Editing",
-          desc: "Dynamic cuts designed for Reels, Shorts, and TikToks.",
-          icon: "🎞️",
-        },
-        {
-          name: "Marketing Videos",
-          desc: "Compelling advertisements and promos to grow your business.",
-          icon: "📢",
-        },
-      ],
-    },
-    {
-      title: "Music Distribution",
-      summary:
-        "Launch your music across digital platforms worldwide with transparency and strategy.",
-      description:
-        "We help artists distribute globally, grow their audience, and maximise royalties.",
-      icon: "🎵",
-      subServices: [
-        {
-          name: "Global Release",
-          desc: "Distribute across Spotify, Apple Music, and all major stores.",
-          icon: "🌍",
-        },
-        {
-          name: "Royalty Management",
-          desc: "Track and manage your music earnings with clarity.",
-          icon: "💰",
-        },
-        {
-          name: "Artist Promotion",
-          desc: "Tailored strategies to promote your music effectively.",
-          icon: "🚀",
-        },
-      ],
-    },
-  ];
+/* --- Service Popup Modal --- */
+function ServicePopup({ service, onClose }) {
+  if (!service) return null;
 
   return (
-    <div className="pt-24 pb-16 bg-[var(--bg-color)]">
-      <div className="container mx-auto px-4">
-        <ScrollAnimation animation="fade-in-up">
-          <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-md"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+      >
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 max-w-6xl w-full"
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.95, opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {service.subServices.map((sub, idx) => (
+            <motion.div
+              key={idx}
+              className="bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden shadow-lg flex flex-col cursor-pointer"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.15 }}
+            >
+              <img
+                src={sub.image}
+                alt={sub.title}
+                className="h-40 w-full object-cover transform transition-transform duration-500 hover:scale-110"
+              />
+              <div className="p-4 flex flex-col flex-1">
+                <h4 className="font-semibold text-lg mb-2 text-[var(--text-color)] dark:text-white">
+                  {sub.title}
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300 flex-1">
+                  {sub.description}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+/* --- Service Card --- */
+function ServiceCard({ service, onClick, reverse }) {
+  const { icon, title, description, subServices } = service;
+  return (
+    <motion.div
+      className={`bg-white dark:bg-neutral-900 rounded-2xl shadow-lg flex flex-col md:flex-row ${
+        reverse ? "md:flex-row-reverse" : ""
+      } cursor-pointer overflow-hidden`}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+      whileHover={{ scale: 1.02, y: -6 }}
+      whileTap={{ scale: 0.99 }}
+      onClick={() => onClick(service)}
+    >
+      {/* Image */}
+      <img
+        src={subServices[0].image}
+        alt={title}
+        className="w-full md:w-1/2 h-64 object-cover"
+      />
+      {/* Content */}
+      <div className="p-6 flex flex-col flex-1 justify-center">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-white/60 dark:bg-black/30 shadow-sm">
+            <div className="text-2xl">{icon}</div>
+          </div>
+          <h3 className="text-2xl font-bold text-[var(--text-color)] dark:text-white">
+            {title}
+          </h3>
+        </div>
+        <p className="mt-4 text-gray-600 dark:text-gray-300 text-sm">
+          {description}
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+/* --- Sample Data --- */
+const services = [
+  {
+    id: 1,
+    icon: "🎨",
+    title: "Graphic Design",
+    description: "Poster Design, Thumbnails, Logos, and more.",
+    subServices: [
+      {
+        title: "Poster Design",
+        description: "Eye-catching posters tailored to your theme.",
+        image:
+          "https://img.freepik.com/free-vector/hand-drawn-graphic-designer-poster_23-2150428116.jpg?semt=ais_incoming&w=740&q=80",
+      },
+      {
+        title: "Thumbnail Design",
+        description: "Clickable thumbnails that grab instant attention.",
+        image:
+          "https://img.freepik.com/premium-psd/we-provide-graphic-design-services-youtube-thumbnail-design_113934-87.jpg",
+      },
+      {
+        title: "Logo Design",
+        description: "Professional and modern logo concepts.",
+        image:
+          "https://images.unsplash.com/photo-1589571894960-20bbe2828d0a?w=600",
+      },
+    ],
+  },
+  {
+    id: 2,
+    icon: "🎬",
+    title: "Video Editing",
+    description: "AI-powered editing, short edits, marketing videos.",
+    subServices: [
+      {
+        title: "AI Editing",
+        description: "Smart automated edits with precision.",
+        image:
+          "https://static-cse.canva.com/blob/2155379/feature_tools-feature_ai-photo-editing_how-to.jpg",
+      },
+      {
+        title: "Short Editing",
+        description: "Quick edits for Reels, Shorts, and TikToks.",
+        image:
+          "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600",
+      },
+      {
+        title: "Marketing Video",
+        description: "High-conversion promo and ad videos.",
+        image:
+          "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600",
+      },
+    ],
+  },
+  {
+    id: 3,
+    icon: "🎵",
+    title: "Music Distribution",
+    description: "Distribute your music to all major platforms.",
+    subServices: [
+      {
+        title: "Prime Digital Arena",
+        description: "Get your music on Spotify, Apple Music & more.",
+        image:
+          "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600",
+      },
+      {
+        title: "Artist Branding",
+        description: "Build your unique artist identity and reach.",
+        image:
+          "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600",
+      },
+      {
+        title: "Promotion",
+        description: "Targeted campaigns to grow your audience.",
+        image:
+          "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=600",
+      },
+    ],
+  },
+];
+
+/* --- Main Page --- */
+export default function ServicesPage() {
+  const [activeService, setActiveService] = useState(null);
+
+  return (
+    <div className="min-h-screen py-12 px-4 sm:px-8 lg:px-16 relative">
+      {/* Background Waves */}
+      <div className="hero-waves pointer-events-none">
+        <div className="wave wave-1" />
+        <div className="wave wave-2" />
+      </div>
+
+      <div className="max-w-6xl mx-auto relative z-10">
+        {/* Hero */}
+        <motion.header
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          className="mb-8 text-center"
+        >
+          <h1 className="text-4xl sm:text-5xl font-extrabold gradient-text">
             Our Services
           </h1>
-        </ScrollAnimation>
-
-        <ScrollAnimation animation="fade-in-up" delay={0.2}>
-          <p className="text-xl text-center text-[var(--text-color)] mb-12 max-w-3xl mx-auto">
-            Explore our core services below. Click on <b>Summary</b> to view detailed explanations and child services.
+          <p className="mt-3 max-w-2xl mx-auto text-gray-600 dark:text-gray-300">
+            Creative, high-impact design and digital services — tailored to your
+            brand and goals.
           </p>
-        </ScrollAnimation>
+        </motion.header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, i) => (
-            <ScrollAnimation key={i} animation="fade-in-up" delay={0.1 * i}>
-              <div className="card rounded-lg p-6 shadow-md bg-[var(--card-bg)] hover:scale-[1.02] transition-transform duration-300">
-                {/* Header */}
-                <div className="flex items-center space-x-3 mb-3">
-                  <span className="text-4xl">{service.icon}</span>
-                  <h3 className="text-xl font-semibold gold-text">{service.title}</h3>
-                </div>
-
-                {/* Always visible summary */}
-                <p className="text-[var(--text-color)] font-medium italic">
-                  {service.summary}
-                </p>
-
-                {/* Summary trigger */}
-                <button
-                  onClick={() => toggleService(i)}
-                  className="mt-3 text-sm font-semibold gold-text hover:underline"
-                >
-                  {openIndex === i ? "Hide details ▲" : "Read more ▼"}
-                </button>
-
-                {/* Expandable explanation */}
-                <div
-                  className={`transition-all duration-700 ease-in-out overflow-hidden ${
-                    openIndex === i ? "max-h-[1200px] mt-4" : "max-h-0"
-                  }`}
-                >
-                  <p className="text-[var(--text-color)] mb-4">
-                    {service.description}
-                  </p>
-
-                  {/* Sub services */}
-                  <div className="grid gap-3 animate-fade-in-stagger">
-                    {service.subServices.map((sub, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3 rounded-md bg-[var(--card-bg)] shadow-sm 
-                                   transition duration-500 group hover:bg-[var(--primary)]"
-                      >
-                        <div className="flex items-start space-x-2">
-                          <span className="text-xl transition-colors duration-500 group-hover:text-white">
-                            {sub.icon}
-                          </span>
-                          <div>
-                            <h4 className="font-semibold text-[var(--text-color)] transition-colors duration-500 group-hover:text-white">
-                              {sub.name}
-                            </h4>
-                            <p className="text-sm text-[var(--text-color)] opacity-80 transition-colors duration-500 group-hover:text-white">
-                              {sub.desc}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </ScrollAnimation>
+        {/* Services Grid with Zigzag */}
+        <section className="flex flex-col gap-10">
+          {services.map((s, idx) => (
+            <ServiceCard
+              key={s.id}
+              service={s}
+              onClick={setActiveService}
+              reverse={idx % 2 === 1}
+            />
           ))}
-        </div>
+        </section>
       </div>
+
+      {/* Popup */}
+      <ServicePopup
+        service={activeService}
+        onClose={() => setActiveService(null)}
+      />
     </div>
   );
-};
-
-export default ServicesPage;
+}

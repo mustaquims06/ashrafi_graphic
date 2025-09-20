@@ -75,3 +75,89 @@ body {
 .animate-pop {
   animation: popIn 0.4s ease forwards;
 }
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-pop {
+  animation: popIn 0.3s ease forwards;
+}
+
+/* Spinner Keyframes (you probably already have @tailwind utilities, 
+   but ensure this is after them so it'll take effect) */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Custom spinner styling using your CSS variables */
+.spinner {
+  width: 2.5rem;
+  /*40px*/height: 2.5rem;
+  border: 4px solid var(--secondary);
+  border-top-color: var(--primary);
+  border-radius: 9999px;
+  animation: spin 1s linear infinite;
+  -webkit-animation: spin 1s linear infinite;
+}
+
+/* Utility classes */
+.gold-text { color: var(--primary); }
+.card { 
+  background-color: var(--card-bg);
+  border: 1px solid rgba(212,175,55,0.2);
+}
+.gradient-bg { background: var(--gradient); }
+
+/* ProductImageGallery custom rules */
+
+/* Arrow buttons */
+.arrow-btn {
+  @apply absolute top-1/2 transform -translate-y-1/2 p-2 rounded-full 
+         shadow-lg transition-opacity duration-300 opacity-0 group-hover:opacity-100;
+  /* background uses the page bg so it sits neatly on any theme */
+  background-color: var(--bg-color);
+}
+
+/* Position helpers */
+.arrow-btn.left-3  { left: 0.75rem; }
+.arrow-btn.right-3 { right: 0.75rem; }
+
+/* Image counter badge */
+.counter-badge {
+  @apply absolute bottom-3 right-3 px-2 py-1 rounded-full text-sm;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+}
+
+/* Thumbnail buttons */
+.thumb-btn {
+  border: 2px solid var(--secondary);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  transition: border-color 0.3s;
+  aspect-ratio: 1 / 1;
+}
+.thumb-btn:hover {
+  border-color: var(--text-color);
+}
+
+/* Active thumbnail */
+.thumb-active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.5);
+}
+
+header {
+  /* lighten the border in light‐mode, darken in dark‐mode */
+  border-color: rgba(44, 44, 44, 0.2);
+}
+.dark-mode header {
+  border-color: rgba(192, 192, 192, 0.2);
+}

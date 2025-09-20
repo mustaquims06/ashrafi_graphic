@@ -1,6 +1,6 @@
 // src/components/Footer.js
 import React from 'react';
-import { FaInstagram, FaYoutube, FaTelegram } from 'react-icons/fa'; // ✅ social icons
+import { FaInstagram, FaYoutube, FaTelegram, FaPinterest, FaFacebook } from 'react-icons/fa'; // ✅ social icons
 
 const Footer = () => {
   return (
@@ -21,7 +21,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <a 
-                  href="https://instagram.com/yourpage" 
+                  href="https://www.instagram.com/ashrafi_graphic?utm_source=qr&igsh=MXR1Y2UxMWp4aWp5OQ==" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center space-x-2 text-gray-300 hover:gold-text transition-colors"
@@ -32,7 +32,29 @@ const Footer = () => {
               </li>
               <li>
                 <a 
-                  href="https://youtube.com/yourchannel" 
+                  href="https://www.facebook.com/share/16ij5aYnpb/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 text-gray-300 hover:gold-text transition-colors"
+                >
+                  <FaFacebook className="text-blue-500 text-xl" /> 
+                  <span>Facebook</span>
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://pin.it/66vGZIxMq" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 text-gray-300 hover:gold-text transition-colors"
+                >
+                  <FaPinterest className="text-red-500 text-xl" /> 
+                  <span>Pinterest</span>
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://youtube.com/@voiceofashrafigraphic?si=xQU9C5S72VnRyVJ9" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center space-x-2 text-gray-300 hover:gold-text transition-colors"
@@ -43,7 +65,7 @@ const Footer = () => {
               </li>
               <li>
                 <a 
-                  href="https://t.me/yourchannel" 
+                  href="http://t.me/Ashrafi_graphic" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center space-x-2 text-gray-300 hover:gold-text transition-colors"
@@ -67,10 +89,10 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Contact Info</h4>
             <address className="text-gray-300 not-italic">
-              <p>123 Design Street</p>
-              <p>Creative City, CC 12345</p>
-              <p className="mt-2">Email: info@ashrafigraphics.com</p>
-              <p>Phone: (123) 456-7890</p>
+              <p>Doodh Bazar</p>
+              <p>Nashik, MAHARASHTRA</p>
+              <p className="mt-2">Email: ashrafigraphicservices@gmail.com</p>
+              <p>Phone: (+91) 8007869205</p>
             </address>
           </div>
         </div>
