@@ -9,7 +9,6 @@ module.exports = {
       colors: {
         primary: 'var(--primary)',
         secondary: 'var(--secondary)',
-        textColor: ['active', 'visited', 'first', 'group-hover'],
       },
       backgroundColor: {
         primary: 'var(--bg-color)',

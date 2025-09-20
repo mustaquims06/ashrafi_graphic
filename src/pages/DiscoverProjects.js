@@ -1,62 +1,62 @@
-// src/pages/DiscoverProjects.js
 import React from "react";
-import "../styles/index.css";
 
-const DiscoverProjects = () => {
+export default function DiscoverProjects() {
   const projects = [
     {
-      id: 1,
-      title: "Creative Poster Design",
-      description: "Unique poster design with premium gold theme.",
-      image: "/assets/discover/project1.png",
+      title: "3D Program Poster",
+      description: "High-quality 3D posters designed with modern aesthetics and gold theme.",
+      image: "/assets/projects/project1.jpg", 
     },
     {
-      id: 2,
       title: "Brand Logo Design",
-      description: "Luxury-inspired brand logos with a professional touch.",
-      image: "/assets/discover/project2.png",
+      description: "Creative Islamic and modern brand logo designs for strong identity.",
+      image: "/assets/projects/project2.jpg",
     },
     {
-      id: 3,
-      title: "Digital Marketing Banner",
-      description: "Stylish banners to boost online presence.",
-      image: "/assets/discover/project3.png",
+      title: "Music Distribution Poster",
+      description: "Stylish posters for music distribution across digital platforms.",
+      image: "/assets/projects/project3.jpg",
     },
   ];
 
   return (
-    <div className="min-h-screen gradient-bg p-8">
-      {/* Page Heading */}
-      <h1 className="text-4xl font-bold text-center gold-text mb-12">
-        Discover Our Projects
-      </h1>
+    <section className="bg-black min-h-screen py-16 text-white">
+      <div className="container mx-auto px-6">
+        {/* Page Title */}
+        <h2 className="text-4xl font-bold text-center mb-12 gold-text">
+          Discover Our Projects
+        </h2>
 
-      {/* Project Cards */}
-      <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-8">
-        {projects.map((project) => (
-          <div
-            key={project.id}
-            className="card rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition-transform"
-          >
-            <img
-              src={project.image}
-              alt={project.title}
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h2 className="text-xl font-semibold gold-text">
-                {project.title}
-              </h2>
-              <p className="text-sm mt-2">{project.description}</p>
-              <button className="mt-4 px-4 py-2 bg-[var(--primary)] text-black rounded-lg font-semibold hover:bg-yellow-500 transition">
-                View Details
-              </button>
+        {/* Projects List */}
+        <div className="space-y-16">
+          {projects.map((project, index) => (
+            <div
+              key={index}
+              className="flex flex-col items-center text-center space-y-6"
+            >
+              {/* Image */}
+              <img
+                src={project.image}
+                alt={project.title}
+                className="w-full md:w-2/3 lg:w-1/2 rounded-lg shadow-lg border-2 border-yellow-600"
+              />
+
+              {/* Text */}
+              <div>
+                <h3 className="text-2xl font-semibold gold-text mb-3">
+                  {project.title}
+                </h3>
+                <p className="text-gray-300 max-w-2xl mx-auto">
+                  {project.description}
+                </p>
+              </div>
+
+              {/* Divider line */}
+              <div className="w-24 h-1 bg-yellow-600 mx-auto mt-4"></div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
-};
-
-export default DiscoverProjects;
+}

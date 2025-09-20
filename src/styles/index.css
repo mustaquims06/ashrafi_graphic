@@ -161,3 +161,22 @@ header {
 .dark-mode header {
   border-color: rgba(192, 192, 192, 0.2);
 }
+.thumb-btn:hover {
+  border-color: var(--text-color);
+}
+
+/* Active thumbnail */
+.thumb-active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.5);
+}
+
+header {
+  /* lighten the border in light‐mode, darken in dark‐mode */
+  border-color: rgba(44, 44, 44, 0.2);
+}
+.dark-mode header {
+  border-color: rgba(192, 192, 192, 0.2);
+
+
+}
