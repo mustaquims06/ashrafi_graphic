@@ -14,6 +14,9 @@ module.exports = {
         primary: 'var(--bg-color)',
         card: 'var(--card-bg)',
       },
+      fontFamily: {
+        graphic: ['Poppins', 'sans-serif'],
+      },
       textColor: {
         primary: 'var(--text-color)',
       },

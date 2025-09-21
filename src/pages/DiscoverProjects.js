@@ -1,62 +1,75 @@
 import React from "react";
+import "../styles/index.css";
+
+// Graphic Design - Posters
+import poster1 from "../assets/discover/poster1.jpg";
+import poster2 from "../assets/discover/poster2.png";
+import poster3 from "../assets/discover/poster3.jpg";
+import poster4 from "../assets/discover/poster4.png";
+
+// Graphic Design - Logos
+import logo1 from "../assets/discover/logo1.jpg";
+import logo2 from "../assets/discover/logo2.jpg";
+import logo3 from "../assets/discover/logo3.png";
+import logo4 from "../assets/discover/logo4.jpg";
+
+// Graphic Design - Thumbnail
+import thumbnail1 from "../assets/discover/thumbnail1.jpg";
+import thumbnail2 from "../assets/discover/thumbnail2.jpg";
+import thumbnail3 from "../assets/discover/thumbnail3.png";
+import thumbnail4 from "../assets/discover/thumbnail4.jpg";
 
 export default function DiscoverProjects() {
-  const projects = [
+  const services = [
     {
-      title: "3D Program Poster",
-      description: "High-quality 3D posters designed with modern aesthetics and gold theme.",
-      image: "/assets/projects/project1.jpg", 
+      id: 1,
+      title: "Graphic Design - Posters",
+      photos: [poster1, poster2, poster3, poster4],
     },
     {
-      title: "Brand Logo Design",
-      description: "Creative Islamic and modern brand logo designs for strong identity.",
-      image: "/assets/projects/project2.jpg",
+      id: 2,
+      title: "Graphic Design - Logos",
+      photos: [logo1, logo2, logo3, logo4],
     },
     {
-      title: "Music Distribution Poster",
-      description: "Stylish posters for music distribution across digital platforms.",
-      image: "/assets/projects/project3.jpg",
+      id: 3,
+      title: "Graphic Design - Thumbnails",
+      photos: [thumbnail1, thumbnail2, thumbnail3, thumbnail4],
     },
   ];
 
   return (
-    <section className="bg-black min-h-screen py-16 text-white">
-      <div className="container mx-auto px-6">
-        {/* Page Title */}
-        <h2 className="text-4xl font-bold text-center mb-12 gold-text">
-          Discover Our Projects
-        </h2>
+    <div className="min-h-screen gradient-bg p-8">
+      <h1 className="text-4xl font-bold text-center gold-text mb-12">
+        Discover Our Projects
+      </h1>
 
-        {/* Projects List */}
-        <div className="space-y-16">
-          {projects.map((project, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center text-center space-y-6"
-            >
-              {/* Image */}
-              <img
-                src={project.image}
-                alt={project.title}
-                className="w-full md:w-2/3 lg:w-1/2 rounded-lg shadow-lg border-2 border-yellow-600"
-              />
+      <div className="space-y-16 max-w-6xl mx-auto">
+        {services.map((service) => (
+          <div key={service.id}>
+            {/* Service Heading */}
+            <h2 className="text-2xl font-bold mb-6 text-center gold-text">
+              {service.title}
+            </h2>
 
-              {/* Text */}
-              <div>
-                <h3 className="text-2xl font-semibold gold-text mb-3">
-                  {project.title}
-                </h3>
-                <p className="text-gray-300 max-w-2xl mx-auto">
-                  {project.description}
-                </p>
-              </div>
-
-              {/* Divider line */}
-              <div className="w-24 h-1 bg-yellow-600 mx-auto mt-4"></div>
+            {/* Photos Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+              {service.photos.map((photo, idx) => (
+                <div
+                  key={idx}
+                  className="w-full aspect-square bg-white rounded-xl shadow-md flex items-center justify-center overflow-hidden hover:scale-105 transition-transform"
+                >
+                  <img
+                    src={photo}
+                    alt={`${service.title} ${idx + 1}`}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
-    </section>
+    </div>
   );
 }

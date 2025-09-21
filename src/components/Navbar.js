@@ -1,7 +1,6 @@
 // src/components/Navbar.js
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import ThemeToggle from './ThemeToggle';
 import logo from "../assets/logo.png"; // ✅ fixed path
 
 const Navbar = () => {
@@ -16,7 +15,6 @@ const Navbar = () => {
     { name: 'Products', path: '/ProductList' },
     { name: 'About', path: '/about' },
     { name: 'Partners', path: '/partners' },
-    
     { name: 'Contact', path: '/contact' },
   ];
 
@@ -25,13 +23,15 @@ const Navbar = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           
-          {/* ✅ Logo Section */}
+          {/* ✅ Logo Section with Highlight */}
           <Link to="/" className="flex items-center space-x-2">
-          <img
-                  src={logo}
-                  alt="Logo"
-                  className="h-16 md:h-20 w-auto object-contain"
-                />
+            <div className="p-1 bg-black rounded-full shadow-lg flex items-center justify-center">
+              <img
+                src={logo}
+                alt="Logo"
+                className="h-12 md:h-14 w-auto object-contain"
+              />
+            </div>
             <div>
               <div className="text-2xl font-bold gold-text">ASHRAFI</div>
               <div className="text-xl font-semibold">GRAPHIC</div>
@@ -51,12 +51,10 @@ const Navbar = () => {
                 {item.name}
               </Link>
             ))}
-            <ThemeToggle />
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-4">
-            <ThemeToggle />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-primary focus:outline-none"

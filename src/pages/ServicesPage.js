@@ -1,9 +1,23 @@
 // src/pages/ServicesPage.js
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+// import music from "../assets/music companys.jpg";
+
+// import logos at the top
+import vevoLogo from "../assets/logos/vevo.png";
+import amazonLogo from "../assets/logos/amazon-music.png";
+import tiktokLogo from "../assets/logos/tiktok.png";
+import deezerLogo from "../assets/logos/deezer.png";
+import appleLogo from "../assets/logos/apple-music.png";
+import spotifyLogo from "../assets/logos/spotify.png";
+import youtubeLogo from "../assets/logos/youtube.png"
+import tidalLogo from "../assets/logos/tidal.png"
+
 
 /* --- Service Popup Modal --- */
 function ServicePopup({ service, onClose }) {
+  const navigate = useNavigate();
   if (!service) return null;
 
   return (
@@ -16,36 +30,101 @@ function ServicePopup({ service, onClose }) {
         onClick={onClose}
       >
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 max-w-6xl w-full"
+          className="relative p-6 max-w-6xl w-full max-h-[90vh] overflow-hidden bg-[var(--bg-color)] rounded-2xl shadow-lg"
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
           transition={{ duration: 0.3 }}
           onClick={(e) => e.stopPropagation()}
         >
-          {service.subServices.map((sub, idx) => (
-            <motion.div
-              key={idx}
-              className="bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden shadow-lg flex flex-col cursor-pointer"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.15 }}
+          {/* Close Button */}
+          <button
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold"
+            onClick={onClose}
+          >
+            &times;
+          </button>
+
+          {/* Scrollable Sub-services */}
+          <div className="overflow-y-auto max-h-[50vh] pr-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center">
+              {service.subServices.map((sub, idx) => (
+                <motion.div
+                  key={idx}
+                  className="bg-[var(--card-bg)] rounded-xl overflow-hidden shadow-md flex flex-col cursor-pointer transition-transform duration-300 scale-95 hover:scale-100 max-w-[250px]"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                >
+                  <img
+                    src={sub.image}
+                    alt={sub.title}
+                    className="h-32 w-full object-cover transform transition-transform duration-500 hover:scale-105"
+                  />
+                  <div className="p-3 flex flex-col items-center text-center">
+                    <h4 className="font-semibold text-base mb-1 text-[var(--text-color)]">
+                      {sub.title}
+                    </h4>
+                    <p className="text-xs text-[var(--text-color)]">{sub.description}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Apply Button */}
+          <div className="mt-4 flex justify-end">
+            <button
+              className="bg-primary text-white px-6 py-3 rounded-lg shadow-lg hover:bg-opacity-90 transition-colors duration-300"
+              onClick={() => {
+                if (window.confirm(`Apply for ${service.title}?`)) {
+                  navigate("/contact");
+                }
+              }}
             >
-              <img
-                src={sub.image}
-                alt={sub.title}
-                className="h-40 w-full object-cover transform transition-transform duration-500 hover:scale-110"
-              />
-              <div className="p-4 flex flex-col flex-1">
-                <h4 className="font-semibold text-lg mb-2 text-[var(--text-color)] dark:text-white">
-                  {sub.title}
+              <p className="text-sm text-[var(--text-color)] flex-1">Apply</p>
+            </button>
+          </div>
+
+          {/* Music Distribution Extra Image + Platforms */}
+          {service.title === "Music Distribution" && (
+            <>
+              
+
+              {/* Available Stores & Many More */}
+              <div className="mt-4 w-full">
+                <h4 className="text-lg font-semibold text-[var(--text-color)] mb-3 text-center">
+                  Available Stores & Many More
                 </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300 flex-1">
-                  {sub.description}
-                </p>
+
+                <div className="flex flex-wrap sm:flex-nowrap gap-6 overflow-x-auto py-2 px-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+                  {[
+                    { name: "Vevo", logo: vevoLogo },
+                    { name: "Amazon Music", logo: amazonLogo },
+                    { name: "TikTok", logo: tiktokLogo },
+                    { name: "Deezer", logo: deezerLogo },
+                    { name: "Apple Music", logo: appleLogo },
+                    { name: "Spotify", logo: spotifyLogo },
+                    { name: "YouTube", logo: youtubeLogo },
+                    { name: "Tidal", logo: tidalLogo },
+                  ].map((platform, idx) => (
+                    <div
+                      key={idx}
+                      className="flex flex-col items-center flex-shrink-0 min-w-[60px] sm:min-w-[80px]"
+                    >
+                      <img
+                        src={platform.logo}
+                        alt={platform.name}
+                        className="h-10 w-auto object-contain mb-1 sm:h-12"
+                      />
+                      <p className="text-xs text-[var(--text-color)] text-center">{platform.name}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </motion.div>
-          ))}
+
+            </>
+          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>
@@ -57,9 +136,9 @@ function ServiceCard({ service, onClick, reverse }) {
   const { icon, title, description, subServices } = service;
   return (
     <motion.div
-      className={`bg-white dark:bg-neutral-900 rounded-2xl shadow-lg flex flex-col md:flex-row ${
+      className={`bg-[var(--card-bg)] rounded-2xl shadow-lg flex flex-col md:flex-row ${
         reverse ? "md:flex-row-reverse" : ""
-      } cursor-pointer overflow-hidden`}
+      } cursor-pointer overflow-hidden transition-colors duration-300`}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -68,31 +147,25 @@ function ServiceCard({ service, onClick, reverse }) {
       whileTap={{ scale: 0.99 }}
       onClick={() => onClick(service)}
     >
-      {/* Image */}
       <img
         src={subServices[0].image}
         alt={title}
         className="w-full md:w-1/2 h-64 object-cover"
       />
-      {/* Content */}
-      <div className="p-6 flex flex-col flex-1 justify-center">
+      <div className="p-6 flex flex-col flex-1 justify-center bg-[var(--card-bg)] transition-colors duration-300">
         <div className="flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-white/60 dark:bg-black/30 shadow-sm">
+          <div className="p-3 rounded-xl bg-[var(--card-bg)]/60 shadow-sm transition-colors duration-300">
             <div className="text-2xl">{icon}</div>
           </div>
-          <h3 className="text-2xl font-bold text-[var(--text-color)] dark:text-white">
-            {title}
-          </h3>
+          <h3 className="text-2xl font-bold text-[var(--text-color)]">{title}</h3>
         </div>
-        <p className="mt-4 text-gray-600 dark:text-gray-300 text-sm">
-          {description}
-        </p>
+        <p className="mt-4 text-[var(--text-color)] text-sm">{description}</p>
       </div>
     </motion.div>
   );
 }
 
-/* --- Sample Data --- */
+/* --- Services Data --- */
 const services = [
   {
     id: 1,
@@ -103,20 +176,17 @@ const services = [
       {
         title: "Poster Design",
         description: "Eye-catching posters tailored to your theme.",
-        image:
-          "https://img.freepik.com/free-vector/hand-drawn-graphic-designer-poster_23-2150428116.jpg?semt=ais_incoming&w=740&q=80",
+        image: "https://img.freepik.com/free-vector/hand-drawn-graphic-designer-poster_23-2150428116.jpg?semt=ais_incoming&w=740&q=80",
       },
       {
         title: "Thumbnail Design",
         description: "Clickable thumbnails that grab instant attention.",
-        image:
-          "https://img.freepik.com/premium-psd/we-provide-graphic-design-services-youtube-thumbnail-design_113934-87.jpg",
+        image: "https://img.freepik.com/premium-psd/we-provide-graphic-design-services-youtube-thumbnail-design_113934-87.jpg",
       },
       {
         title: "Logo Design",
         description: "Professional and modern logo concepts.",
-        image:
-          "https://images.unsplash.com/photo-1589571894960-20bbe2828d0a?w=600",
+        image: "https://images.unsplash.com/photo-1589571894960-20bbe2828d0a?w=600",
       },
     ],
   },
@@ -129,20 +199,17 @@ const services = [
       {
         title: "AI Editing",
         description: "Smart automated edits with precision.",
-        image:
-          "https://static-cse.canva.com/blob/2155379/feature_tools-feature_ai-photo-editing_how-to.jpg",
+        image: "https://static-cse.canva.com/blob/2155379/feature_tools-feature_ai-photo-editing_how-to.jpg",
       },
       {
         title: "Short Editing",
         description: "Quick edits for Reels, Shorts, and TikToks.",
-        image:
-          "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600",
+        image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600",
       },
       {
         title: "Marketing Video",
         description: "High-conversion promo and ad videos.",
-        image:
-          "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600",
+        image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600",
       },
     ],
   },
@@ -153,22 +220,29 @@ const services = [
     description: "Distribute your music to all major platforms.",
     subServices: [
       {
-        title: "Prime Digital Arena",
-        description: "Get your music on Spotify, Apple Music & more.",
-        image:
-          "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600",
+        title: "Music Promotion",
+        description: "Work with our team to promote your releases and reach new fans.",
+        image: "https://promosoundgroup.net/wp-content/uploads/2024/04/Buy-Music-Promotion.webp",
       },
       {
-        title: "Artist Branding",
-        description: "Build your unique artist identity and reach.",
-        image:
-          "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600",
+        title: "Pre-Save-Links",
+        description: "Promote your music with Pre-Save SmartLinks one place for all your important links.",
+        image: "https://cdn.prod.website-files.com/655e0fa544c67c1ee5ce01c7/663e40ba3b84dc5172279684_pre-save-links-og.webp",
       },
       {
-        title: "Promotion",
-        description: "Targeted campaigns to grow your audience.",
-        image:
-          "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=600",
+        title: "Top Tracks & Artists",
+        description: "Upload your music for a chance to be featured to thousands of followers worldwide.",
+        image: "https://preview.redd.it/my-top-tracks-and-artists-from-the-last-6-months-and-4-weeks-v0-q0uizi4cejne1.png?width=1248&format=png&auto=webp&s=a31bdb34522536ac64351a75a28dfd70d67bb3b6",
+      },
+      {
+        title: "YouTube Content ID",
+        description: "Content ID is YouTube's digital fingerprint system that identifies and tracks uploaded content.",
+        image: "https://blog.hoopr.ai/wp-content/uploads/2025/07/67053c76ac321a53efe6adda_YouTube-Content-ID.png",
+      },
+      {
+        title: "Rights Manager",
+        description: "Protects, monetizes, and controls your content by managing claims, takedowns, and monetization.",
+        image: "https://tiempodenegocios.com/wp-content/uploads/2017/05/facebook-rights-manager.jpg",
       },
     ],
   },
@@ -179,7 +253,7 @@ export default function ServicesPage() {
   const [activeService, setActiveService] = useState(null);
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-8 lg:px-16 relative">
+    <div className="min-h-screen py-12 px-4 sm:px-8 lg:px-16 relative bg-[var(--bg-color)] transition-colors duration-500">
       {/* Background Waves */}
       <div className="hero-waves pointer-events-none">
         <div className="wave wave-1" />
@@ -197,7 +271,7 @@ export default function ServicesPage() {
           <h1 className="text-4xl sm:text-5xl font-extrabold gradient-text">
             Our Services
           </h1>
-          <p className="mt-3 max-w-2xl mx-auto text-gray-600 dark:text-gray-300">
+          <p className="mt-3 max-w-2xl mx-auto text-[var(--text-color)]">
             Creative, high-impact design and digital services — tailored to your
             brand and goals.
           </p>

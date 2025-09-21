@@ -40,6 +40,11 @@ body {
 .gradient-bg {
   background: var(--gradient);
 }
+/* Graphic/Product font style */
+.graphic-font {
+  font-family: 'Poppins', sans-serif;
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
