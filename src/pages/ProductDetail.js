@@ -1,171 +1,148 @@
 // src/pages/ProductDetail.jsx
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 import Navigation from "../components/Navigation";
 import ProductImageGallery from "../components/ProductImageGallery";
 import SizeSelector from "../components/SizeSelector";
-import ProductCard from "../components/ProductCard";
 
-import {
-  useProduct,
-  useReviews,
-  useUserPurchases,
-} from "../hooks/useProducts";
-import "../styles/index.css";  // ensure your theme CSS is loaded
+import { useProducts } from "../hooks/useProducts";
+import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
+
+import "../styles/index.css";
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const { product } = useProduct(id);
-  const { reviews } = useReviews(id);
-  const { purchases } = useUserPurchases(1, id);
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { addToWishlist } = useWishlist();
 
-  const [selectedSize, setSelectedSize] = useState(
-    product?.defaultSize || null
-  );
+  const { products: baseProducts } = useProducts();
+  const [product, setProduct] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
+
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("products")) || [];
+    const combined = [...(baseProducts || []), ...stored];
+    const found = combined.find((p) => String(p.id) === String(id));
+    setProduct(found || null);
+    if (found?.defaultSize) setSelectedSize(found.defaultSize);
+  }, [id, baseProducts]);
 
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center gradient-bg">
-        <p className="text-[var(--secondary)]">Loading product...</p>
+        <p className="text-lg gold-text animate-pop">⚠️ Product not found...</p>
       </div>
     );
   }
 
+  const isLoggedIn = () => localStorage.getItem("currentUser") !== null;
+
+  const handleBuyNow = () => {
+    if (!isLoggedIn()) {
+      alert("Please login first");
+      navigate("/login");
+      return;
+    }
+    addToCart({ ...product, size: selectedSize || "Default" });
+    navigate("/checkout");
+  };
+
+  const handleAddToCart = () => {
+    if (!isLoggedIn()) {
+      alert("Please login first");
+      navigate("/login");
+      return;
+    }
+    addToCart({ ...product, size: selectedSize || "Default" });
+    alert("✅ Added to cart!");
+  };
+
+  const handleWishlist = () => {
+    if (!isLoggedIn()) {
+      alert("Please login first");
+      navigate("/login");
+      return;
+    }
+    addToWishlist(product);
+    alert("❤️ Added to wishlist!");
+  };
+
   return (
     <div className="min-h-screen gradient-bg">
-      {/* Navigation */}
       <Navigation />
 
-      {/* Product Detail */}
-      <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Gallery */}
+      <div className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+        
+        {/* Left - Image Gallery with Badge */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
+          className="relative card p-4 rounded animate-pop"
         >
+          {/* ✅ Badge */}
+          {(product.offer || product.bestseller) && (
+            <div className="absolute top-3 left-3 bg-[var(--primary)] text-white px-3 py-1 rounded-full shadow animate-pop text-sm font-bold tracking-wide">
+              {product.offer ? `🔥 ${product.offer}` : "⭐ Bestseller"}
+            </div>
+          )}
           <ProductImageGallery
-            images={product.images}
+            images={product.images || []}
             productName={product.name}
+            image={product.image}
+            video={product.video}
           />
         </motion.div>
 
-        {/* Info */}
+        {/* Right - Details */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-6"
+          className="space-y-6 animate-pop"
         >
-          <h1 className="text-4xl font-bold gold-text">
-            {product.name}
-          </h1>
-          <p className="text-[var(--secondary)]">
-            {product.description}
-          </p>
-
-          <div className="text-3xl font-bold gold-text">
-            {product.currencySymbol}
-            {product.price.toFixed(2)}
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <span className="text-yellow-400 font-bold">★</span>
-            <span className="text-[var(--secondary)]">
-              {product.rating} ({product.reviewCount} reviews)
-            </span>
-          </div>
-
-          <SizeSelector
-            sizes={product.sizes}
-            selectedSize={selectedSize}
-            onSizeChange={setSelectedSize}
-          />
-
-          {/* Buttons */}
-          <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex-1 bg-[var(--primary)] text-[var(--bg-color)]
-                         px-4 py-3 rounded-lg font-medium transition"
-            >
-              Order Now
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex-1 border border-[var(--primary)] text-[var(--primary)]
-                         px-4 py-3 rounded-lg font-medium hover:bg-[var(--primary)]
-                         hover:text-[var(--bg-color)] transition"
-            >
-              Add to Cart
-            </motion.button>
-          </div>
-
-          {/* Reviews */}
-          {reviews.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold gold-text mb-4">
-                Reviews
-              </h2>
-              <div className="space-y-4">
-                {reviews.map((r) => (
-                  <div
-                    key={r.id}
-                    className="card p-4 rounded-lg shadow-md"
-                  >
-                    <div className="flex justify-between mb-2">
-                      <span className="font-medium text-[var(--text-color)]">
-                        {r.user}
-                      </span>
-                      <span className="text-yellow-400">
-                        ★ {r.rating}
-                      </span>
-                    </div>
-                    <p className="text-[var(--secondary)]">
-                      {r.comment}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <h1 className="text-4xl font-bold gold-text">{product.name}</h1>
+          
+          {product.description && (
+            <p className="text-base text-[var(--text-color)]">{product.description}</p>
+          )}
+          
+          <p className="text-3xl font-bold gold-text">₹{Number(product.price).toFixed(2)}</p>
+          
+          {product.sizes && product.sizes.length > 0 && (
+            <SizeSelector
+              sizes={product.sizes}
+              selectedSize={selectedSize}
+              onSizeChange={setSelectedSize}
+            />
           )}
 
-          {/* Purchase Info */}
-          {purchases.length > 0 && (
-            <div className="mt-6 text-green-600 font-medium">
-              You purchased this item{" "}
-              {purchases.reduce((sum, p) => sum + p.quantity, 0)} times
-            </div>
-          )}
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 pt-6">
+            <button
+              onClick={handleBuyNow}
+              className="flex-1 bg-[var(--primary)] text-white py-3 rounded shadow hover:brightness-110 transition"
+            >
+              🛒 Buy Now
+            </button>
+
+            <button
+              onClick={handleAddToCart}
+              className="flex-1 border-2 border-[var(--primary)] text-[var(--primary)] py-3 rounded hover:bg-[var(--primary)] hover:text-white transition"
+            >
+              ➕ Add to Cart
+            </button>
+
+            <button
+              onClick={handleWishlist}
+              className="flex-1 border-2 border-pink-500 text-pink-500 py-3 rounded hover:bg-pink-500 hover:text-white transition"
+            >
+              ❤️ Wishlist
+            </button>
+          </div>
         </motion.div>
-      </div>
-
-      {/* Related Products */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold gold-text mb-4">
-          Related Products
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Using same card + pop-in animation */}
-          {Array(3)
-            .fill(product)
-            .map((p, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * i }}
-                className="card border-[var(--primary)] border-opacity-20 shadow-md rounded-lg overflow-hidden"
-              >
-                <ProductCard product={p} />
-              </motion.div>
-            ))}
-        </div>
       </div>
     </div>
   );

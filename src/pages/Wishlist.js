@@ -45,7 +45,7 @@ export default function Wishlist() {
               Save your favorite products here!
             </p>
             <Link
-              to="/"
+              to="/ProductList"
               className="inline-flex items-center bg-[var(--primary)] text-[var(--bg-color)]
                          px-6 py-3 rounded-lg hover:opacity-90 transition"
             >

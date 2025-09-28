@@ -185,9 +185,28 @@ This cap is a perfect combination of spiritual identity and sophisticated design
 ];
 
 // Helper function to get primary image
+// src/utils/getPrimaryImage.js
 export const getPrimaryImage = (product) => {
-  const primaryImage = product.images.find(img => img.isPrimary);
-  return primaryImage ? primaryImage.url : product.images[0]?.url;
+  try {
+    // if product.images array exists (static products)
+    if (product && Array.isArray(product.images) && product.images.length > 0) {
+      return (
+        product.images.find((img) => img.isPrimary)?.url ||
+        product.images[0]?.url
+      );
+    }
+
+    // if admin uploaded single image string
+    if (product && product.image) {
+      return product.image;
+    }
+
+    // fallback if nothing
+    return "/placeholder.png";
+  } catch (err) {
+    console.error("⚠️ getPrimaryImage crashed for:", product, err);
+    return "/placeholder.png";
+  }
 };
 
 // Generate mock reviews for each product

@@ -3,7 +3,7 @@ import React from 'react';
 import ScrollAnimation from '../components/ScrollAnimation';
 
 const AboutPage = () => {
-  return (
+  return ( 
     <div className="pt-24 pb-16">
       {/* Outer container */}
       <div className="container mx-auto px-4">

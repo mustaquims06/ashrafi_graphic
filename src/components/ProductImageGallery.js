@@ -1,75 +1,84 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import '../styles/index.css';   // ensure your CSS vars & custom rules are loaded
+// src/components/ProductImageGallery.jsx
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import "../styles/index.css";
 
-const ProductImageGallery = ({ images, productName }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+const ProductImageGallery = ({ images = [], productName, image, video }) => {
+  // Normalize gallery images
+  let galleryImages = [];
 
-  const nextImage = () =>
-    setCurrentImageIndex((i) => (i + 1) % images.length);
-  const previousImage = () =>
-    setCurrentImageIndex(
-      (i) => (i - 1 + images.length) % images.length
+  if (Array.isArray(images) && images.length > 0) {
+    galleryImages = images.map((img, idx) => ({
+      id: img.id || idx,
+      url: img.url || img,
+      alt: img.alt || productName,
+    }));
+  } else if (image) {
+    galleryImages = [{ id: 1, url: image, alt: productName }];
+  }
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const nextImage = () => setCurrentIndex((i) => (i + 1) % galleryImages.length);
+  const prevImage = () => setCurrentIndex((i) => (i - 1 + galleryImages.length) % galleryImages.length);
+  const goToIndex = (idx) => setCurrentIndex(idx);
+
+  if (video) {
+    return (
+      <video
+        src={video}
+        controls
+        className="w-full h-auto rounded-lg shadow-md"
+      />
     );
-  const goToImage = (idx) => setCurrentImageIndex(idx);
+  }
 
   return (
     <div className="space-y-4 product-gallery">
       {/* Main Image */}
       <div className="relative aspect-square overflow-hidden rounded-lg bg-[var(--card-bg)] group">
         <motion.img
-          key={currentImageIndex}
-          src={images[currentImageIndex]?.url}
-          alt={images[currentImageIndex]?.alt || productName}
+          key={currentIndex}
+          src={galleryImages[currentIndex]?.url || "/placeholder.png"}
+          alt={galleryImages[currentIndex]?.alt || productName}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         />
 
-        {/* Arrows */}
-        {images.length > 1 && (
+        {galleryImages.length > 1 && (
           <>
-            <button
-              onClick={previousImage}
-              className="arrow-btn left-3"
-            >
+            <button onClick={prevImage} className="arrow-btn left-3">
               <ChevronLeft className="h-5 w-5 text-[var(--text-color)]" />
             </button>
-            <button
-              onClick={nextImage}
-              className="arrow-btn right-3"
-            >
+            <button onClick={nextImage} className="arrow-btn right-3">
               <ChevronRight className="h-5 w-5 text-[var(--text-color)]" />
             </button>
           </>
         )}
 
-        {/* Counter */}
-        <div className="counter-badge">
-          {currentImageIndex + 1} / {images.length}
-        </div>
+        {galleryImages.length > 1 && (
+          <div className="counter-badge">{currentIndex + 1} / {galleryImages.length}</div>
+        )}
       </div>
 
-      {/* Thumbnails */}
-      {images.length > 1 && (
+      {galleryImages.length > 1 && (
         <div className="grid grid-cols-4 gap-3">
-          {images.map((img, idx) => {
-            const isActive = idx === currentImageIndex;
+          {galleryImages.map((img, idx) => {
+            const isActive = idx === currentIndex;
             return (
               <motion.button
                 key={img.id}
-                onClick={() => goToImage(idx)}
-                className={`thumb-btn ${
-                  isActive ? 'thumb-active' : ''
-                }`}
+                onClick={() => goToIndex(idx)}
+                className={`thumb-btn ${isActive ? "thumb-active" : ""}`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <img
                   src={img.url}
-                  alt={img.alt || `${productName} - View ${idx + 1}`}
+                  alt={img.alt}
                   className="w-full h-full object-cover"
                 />
               </motion.button>

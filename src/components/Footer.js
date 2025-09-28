@@ -11,7 +11,7 @@ import {
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-800 text-white py-12 mt-16">
+    <footer className="bg-gray-800 text-white py-6 mt-16"> {/* height kam ki */}
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           
@@ -25,66 +25,55 @@ const Footer = () => {
             </p>
           </div>
           
-          {/* Social Media */}
+          {/* Social Media - only icons horizontally */}
           <div>
             <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
-            <ul className="space-y-3">
-              <li>
-                <a 
-                  href="https://www.instagram.com/ashrafi_graphic"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-[var(--primary)] transition-colors"
-                >
-                  <FaInstagram className="text-xl text-pink-500" />
-                  <span>Instagram</span>
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="https://www.facebook.com/share/16ij5aYnpb/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-[var(--primary)] transition-colors"
-                >
-                  <FaFacebook className="text-xl text-blue-500" />
-                  <span>Facebook</span>
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="https://pin.it/66vGZIxMq"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-[var(--primary)] transition-colors"
-                >
-                  <FaPinterest className="text-xl text-red-500" />
-                  <span>Pinterest</span>
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="https://youtube.com/@voiceofashrafigraphic"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-[var(--primary)] transition-colors"
-                >
-                  <FaYoutube className="text-xl text-red-600" />
-                  <span>YouTube</span>
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="https://t.me/Ashrafi_graphic"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-[var(--primary)] transition-colors"
-                >
-                  <FaTelegram className="text-xl text-sky-400" />
-                  <span>Telegram</span>
-                </a>
-              </li>
-            </ul>
+            <div className="flex space-x-4">
+              <a
+                href="https://www.instagram.com/ashrafi_graphic"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[var(--primary)] transition-colors"
+              >
+                <FaInstagram className="text-2xl text-pink-500" />
+              </a>
+
+              <a
+                href="https://www.facebook.com/share/16ij5aYnpb/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[var(--primary)] transition-colors"
+              >
+                <FaFacebook className="text-2xl text-blue-500" />
+              </a>
+
+              <a
+                href="https://pin.it/66vGZIxMq"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[var(--primary)] transition-colors"
+              >
+                <FaPinterest className="text-2xl text-red-500" />
+              </a>
+
+              <a
+                href="https://youtube.com/@voiceofashrafigraphic"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[var(--primary)] transition-colors"
+              >
+                <FaYoutube className="text-2xl text-red-600" />
+              </a>
+
+              <a
+                href="https://t.me/Ashrafi_graphic"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[var(--primary)] transition-colors"
+              >
+                <FaTelegram className="text-2xl text-sky-400" />
+              </a>
+            </div>
           </div>
 
           {/* Services Links */}
@@ -92,26 +81,17 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-4">Services</h4>
             <ul className="space-y-2">
               <li>
-                <Link
-                  to="/services"
-                  className="text-gray-300 hover:text-[var(--primary)] transition-colors"
-                >
+                <Link to="/services" className="text-gray-300 hover:text-[var(--primary)] transition-colors">
                   Graphic Design
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/services"
-                  className="text-gray-300 hover:text-[var(--primary)] transition-colors"
-                >
+                <Link to="/services" className="text-gray-300 hover:text-[var(--primary)] transition-colors">
                   Video Editing
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/services"
-                  className="text-gray-300 hover:text-[var(--primary)] transition-colors"
-                >
+                <Link to="/services" className="text-gray-300 hover:text-[var(--primary)] transition-colors">
                   Music Distribution
                 </Link>
               </li>
@@ -132,7 +112,7 @@ const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+        <div className="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
           <p>&copy; {new Date().getFullYear()} Ashrafi Graphic. All rights reserved.</p>
         </div>
       </div>
