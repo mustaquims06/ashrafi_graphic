@@ -47,7 +47,10 @@ export default function ProductDetail() {
       navigate("/login");
       return;
     }
-    addToCart({ ...product, size: selectedSize || "Default" });
+    addToCart({
+      ...product,
+      selectedSize: selectedSize || "Default",
+    });
     navigate("/checkout");
   };
 
@@ -57,7 +60,10 @@ export default function ProductDetail() {
       navigate("/login");
       return;
     }
-    addToCart({ ...product, size: selectedSize || "Default" });
+    addToCart({
+      ...product,
+      selectedSize: selectedSize || "Default",
+    });
     alert("✅ Added to cart!");
   };
 
@@ -71,12 +77,19 @@ export default function ProductDetail() {
     alert("❤️ Added to wishlist!");
   };
 
+  // ✅ Price handling same as ProductList
+  const originalPrice = Number(product.originalPrice || product.price || 0);
+  const salePrice = Number(product.salePrice || product.price || 0);
+  const discount =
+    originalPrice && salePrice
+      ? Math.round(((originalPrice - salePrice) / originalPrice) * 100)
+      : 0;
+
   return (
     <div className="min-h-screen gradient-bg">
       <Navigation />
 
       <div className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-        
         {/* Left - Image Gallery with Badge */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -104,13 +117,30 @@ export default function ProductDetail() {
           className="space-y-6 animate-pop"
         >
           <h1 className="text-4xl font-bold gold-text">{product.name}</h1>
-          
+
           {product.description && (
-            <p className="text-base text-[var(--text-color)]">{product.description}</p>
+            <p className="text-base text-[var(--text-color)]">
+              {product.description}
+            </p>
           )}
-          
-          <p className="text-3xl font-bold gold-text">₹{Number(product.price).toFixed(2)}</p>
-          
+
+          {/* ✅ Price display like ProductList */}
+          <div className="flex items-center space-x-3">
+            {originalPrice > salePrice && (
+              <span className="line-through text-gray-400 text-xl">
+                ₹{originalPrice.toFixed(2)}
+              </span>
+            )}
+            <span className="text-3xl font-bold text-green-600">
+              ₹{salePrice.toFixed(2)}
+            </span>
+            {discount > 0 && (
+              <span className="text-red-500 text-lg font-semibold">
+                ({discount}% OFF)
+              </span>
+            )}
+          </div>
+
           {product.sizes && product.sizes.length > 0 && (
             <SizeSelector
               sizes={product.sizes}

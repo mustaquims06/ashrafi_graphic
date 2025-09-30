@@ -1,10 +1,12 @@
-// src/pages/Checkout.js   (important: replace your file with this)
+// src/pages/Checkout.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 
 const Checkout = () => {
   const { cart, clearCart } = useCart();
+
+  // ✅ states
   const [paymentMethod, setPaymentMethod] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -12,6 +14,7 @@ const Checkout = () => {
 
   const navigate = useNavigate();
 
+  // ✅ load user
   useEffect(() => {
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
     if (!currentUser) {
@@ -23,64 +26,71 @@ const Checkout = () => {
     setAddress(currentUser.address || "");
   }, [navigate]);
 
+  // ✅ place order
   const handlePlaceOrder = () => {
     if (!paymentMethod || !phone || !address) {
       alert("⚠️ Please fill all details (phone, address, payment method)");
       return;
     }
 
-    // Update user profile
     const updatedUser = { ...user, phone, address };
+
     let users = JSON.parse(localStorage.getItem("users")) || [];
     users = users.map((u) => (u.email === user.email ? updatedUser : u));
     localStorage.setItem("users", JSON.stringify(users));
     localStorage.setItem("currentUser", JSON.stringify(updatedUser));
 
-    // Save order
     const newOrder = {
       id: Date.now(),
       userEmail: user.email,
       items: cart,
-      total: cart.reduce((sum, i) => sum + i.price, 0),
+      total: cart.reduce((sum, i) => sum + i.price * (i.quantity || 1), 0),
       phone,
       address,
       paymentMethod,
-      date: new Date().toISOString(),
+      date: new Date().toLocaleString(),
+      status: "Pending",
     };
 
     const orders = JSON.parse(localStorage.getItem("orders")) || [];
     orders.push(newOrder);
     localStorage.setItem("orders", JSON.stringify(orders));
 
-    alert("✅ Order placed successfully!");
-
     clearCart();
-    navigate("/orders"); // go to order history
+
+    // ✅ redirect to Thank You page
+    navigate("/thankyou");
   };
 
   if (!cart.length) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-lg text-gray-600">Your cart is empty. Add products first.</p>
+        <p className="text-lg text-gray-600">
+          Your cart is empty. Add products first.
+        </p>
       </div>
     );
   }
 
-  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  const total = cart.reduce((sum, item) => sum + item.price * (item.quantity || 1), 0);
 
   return (
     <div className="min-h-screen bg-gray-100 py-10">
       <div className="max-w-3xl mx-auto bg-white shadow rounded-lg p-8">
         <h2 className="text-2xl font-bold mb-6">Checkout</h2>
 
-        {/* Order Summary */}
+        {/* ✅ Order Summary */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold">Order Summary</h3>
           <ul className="divide-y">
             {cart.map((item, idx) => (
               <li key={idx} className="py-2 flex justify-between">
-                <span>{item.name}</span>
-                <span>₹{item.price}</span>
+                <span>
+                  {item.name} {item.selectedSize ? `(${item.selectedSize})` : ""}
+                </span>
+                <span>
+                  ₹{item.price} × {item.quantity}
+                </span>
               </li>
             ))}
           </ul>
@@ -90,7 +100,7 @@ const Checkout = () => {
           </div>
         </div>
 
-        {/* Delivery Details */}
+        {/* ✅ Delivery Details */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold">Delivery Details</h3>
           <input
@@ -109,11 +119,14 @@ const Checkout = () => {
           />
         </div>
 
-        {/* Payment */}
+        {/* ✅ Payment Options */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold">Payment</h3>
           <label className="block">
-            <input type="radio" name="pm" value="Credit Card"
+            <input
+              type="radio"
+              name="pm"
+              value="Credit Card"
               checked={paymentMethod === "Credit Card"}
               onChange={(e) => setPaymentMethod(e.target.value)}
               className="mr-2"
@@ -121,7 +134,10 @@ const Checkout = () => {
             💳 Credit Card
           </label>
           <label className="block">
-            <input type="radio" name="pm" value="UPI"
+            <input
+              type="radio"
+              name="pm"
+              value="UPI"
               checked={paymentMethod === "UPI"}
               onChange={(e) => setPaymentMethod(e.target.value)}
               className="mr-2"
@@ -129,7 +145,10 @@ const Checkout = () => {
             💰 UPI / Netbanking
           </label>
           <label className="block">
-            <input type="radio" name="pm" value="Cash on Delivery"
+            <input
+              type="radio"
+              name="pm"
+              value="Cash on Delivery"
               checked={paymentMethod === "Cash on Delivery"}
               onChange={(e) => setPaymentMethod(e.target.value)}
               className="mr-2"
@@ -138,9 +157,10 @@ const Checkout = () => {
           </label>
         </div>
 
+        {/* ✅ Place Order Button */}
         <button
           onClick={handlePlaceOrder}
-          className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700"
+          className="w-full bg-[var(--primary)] text-white py-3 rounded-lg hover:brightness-110 transition"
         >
           Place Order
         </button>

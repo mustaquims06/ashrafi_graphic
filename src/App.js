@@ -21,6 +21,7 @@ import { AuthProvider } from "./context/AuthContext";   // ✅ Auth provide
 import PrivateRoute from "./components/PrivateRoute";
 
 // Pages
+import ThankYou from "./pages/ThankYou";
 
 import ProductList from "./pages/ProductList";
 import ProductDetail from "./pages/ProductDetail";
@@ -36,6 +37,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 
 import WhatsAppBot from "./components/WhatsAppBot";
 
+//import ThemeSwitcher from "./components/ThemeSwitcher"; <ThemeSwitcher />
+
 export default function App() {
   return (
     <AuthProvider>
@@ -45,13 +48,14 @@ export default function App() {
             <ScrollToTop />
             <div className="App min-h-screen flex flex-col">
               <Navbar />
+              
               <main className="flex-grow gradient-bg">
                 <Routes>
                   {/* Public Routes */}
                   <Route path="/" element={<Home />} />
                   <Route path="/discover-projects" element={<DiscoverProjects />} />
                   <Route path="/services" element={<ServicesPage />} />
-
+                  <Route path="/thankyou" element={<ThankYou />} />
 
                   <Route path="/productlist" element={<ProductList />} />
                   <Route path="/product/:id" element={<ProductDetail />} />

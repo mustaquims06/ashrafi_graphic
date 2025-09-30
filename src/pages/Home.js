@@ -14,7 +14,7 @@ const Home = () => {
    
       <Statistics />
       <Testimonials />
-    </div>
+    </div> 
   );
 };
 
