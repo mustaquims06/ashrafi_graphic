@@ -6,7 +6,7 @@ const CartContext = createContext();
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
 
-  // ➕ Add item OR merge into existing if same id + size
+  // ➕ Add an item (or bump quantity if already in cart with same size)
   const addToCart = (product) => {
     setCart((prev) => {
       const idx = prev.findIndex(
@@ -14,54 +14,55 @@ export function CartProvider({ children }) {
       );
 
       if (idx > -1) {
-        // 🔥 product already exists → merge quantity
+        // already in cart → increase quantity
         const updated = [...prev];
         updated[idx].quantity += product.quantity ?? 1;
         return updated;
       } else {
-        // 🆕 new product
         return [...prev, { ...product, quantity: product.quantity ?? 1 }];
       }
     });
   };
 
-  // ❌ Remove 1 quantity, or drop entirely if 1 left
+  // ❌ Remove ↓ – reduce quantity by 1 or remove item completely
   const removeFromCart = (id, selectedSize) => {
     setCart((prev) =>
       prev.reduce((acc, item) => {
         if (item.id === id && item.selectedSize === selectedSize) {
           if (item.quantity > 1) {
-            acc.push({ ...item, quantity: item.quantity - 1 }); // decrease qty
+            // decrease only one
+            acc.push({ ...item, quantity: item.quantity - 1 });
           }
+          // if quantity = 1 → don't push (remove it)
         } else {
-          acc.push(item); // untouched items
+          acc.push(item);
         }
         return acc;
       }, [])
     );
   };
 
-  // ✏️ Update quantity from input box
+  // ✏️ Update a product's quantity directly (e.g. from quantity input box)
   const updateQuantity = (id, selectedSize, quantity) => {
     setCart((prev) =>
       prev
         .map((item) =>
           item.id === id && item.selectedSize === selectedSize
-            ? { ...item, quantity: Math.max(1, quantity) } // stop zero/negative
+            ? { ...item, quantity: Math.max(1, quantity) }
             : item
         )
-        .filter((item) => item.quantity > 0) // cleanup zero qty
+        .filter((item) => item.quantity > 0)
     );
   };
 
-  // 💰 Total price
+  // 💰 Calculate total price
   const getCartTotal = () =>
     cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // 🧹 Empty cart
+  // 🧹 Empty entire cart
   const clearCart = () => setCart([]);
 
-  // 🔢 Total items count (useful for nav badge)
+  // 🛒 Show total items count (useful for nav badge)
   const getCartItemsCount = () =>
     cart.reduce((sum, item) => sum + item.quantity, 0);
 

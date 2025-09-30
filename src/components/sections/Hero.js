@@ -6,17 +6,18 @@ import { ReactTyped } from "react-typed";
 
 const Hero = () => {
   return (
-    <section className="hero-section min-h-screen flex items-center justify-center gradient-bg py-16">
+    <section className="min-h-screen flex items-center justify-center gradient-bg py-16">
       <div className="container mx-auto px-4 text-center">
 
         {/* Heading with typing effect */}
         <ScrollAnimation animation="fade-in-up">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 heading-font">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">
             <ReactTyped
               strings={["Ashrafi <span class='gold-text'>Graphic</span>"]}
               typeSpeed={70}
               backSpeed={40}
               showCursor={false}
+              smartBackspace={true}
               loop={false}
             />
           </h1>
@@ -42,8 +43,8 @@ const Hero = () => {
         <ScrollAnimation animation="fade-in-up" delay={0.4}>
           <div className="flex justify-center">
             <Link
-              to="/discover-projects"   
-              className="hero-btn"
+              to="/discover-projects"   // 🔗 yaha link change kiya
+              className="bg-[#d4af37] text-white px-8 py-3 rounded-lg font-semibold shadow-md hover:bg-[#b8962e] transition-colors"
             >
               Discover Projects
             </Link>
