@@ -1,7 +1,7 @@
-// src/pages/Checkout.js   (important: replace your file with this)
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import toast from "react-hot-toast";
 
 const Checkout = () => {
   const { cart, clearCart } = useCart();
@@ -9,7 +9,6 @@ const Checkout = () => {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [user, setUser] = useState(null);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,64 +22,129 @@ const Checkout = () => {
     setAddress(currentUser.address || "");
   }, [navigate]);
 
-  const handlePlaceOrder = () => {
+  // ✅ Use finalPrice if available, else fallback to price
+  const total = cart.reduce(
+    (sum, item) =>
+      sum + (item.finalPrice || item.price) * (item.quantity || 1),
+    0
+  );
+
+  const handlePlaceOrder = async () => {
     if (!paymentMethod || !phone || !address) {
-      alert("⚠️ Please fill all details (phone, address, payment method)");
+      toast.error("⚠️ Please fill all details (phone, address, payment method)");
       return;
     }
 
-    // Update user profile
+    // Update profile locally
     const updatedUser = { ...user, phone, address };
     let users = JSON.parse(localStorage.getItem("users")) || [];
     users = users.map((u) => (u.email === user.email ? updatedUser : u));
     localStorage.setItem("users", JSON.stringify(users));
     localStorage.setItem("currentUser", JSON.stringify(updatedUser));
 
-    // Save order
+    // Prepare order payload
+    const items = cart.map((i) => ({
+      productId: i._id || i.id,
+      name: i.name,
+      price: i.finalPrice || i.price,
+      quantity: i.quantity || 1,
+      selectedSize: i.selectedSize || null,
+    }));
+
     const newOrder = {
       id: Date.now(),
       userEmail: user.email,
-      items: cart,
-      total: cart.reduce((sum, i) => sum + i.price, 0),
+      items,
+      total,
       phone,
       address,
       paymentMethod,
       date: new Date().toISOString(),
     };
 
-    const orders = JSON.parse(localStorage.getItem("orders")) || [];
-    orders.push(newOrder);
-    localStorage.setItem("orders", JSON.stringify(orders));
+    try {
+      const token = updatedUser.token;
+      if (!token) throw new Error("No token found");
 
-    alert("✅ Order placed successfully!");
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/orders`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(newOrder),
+        }
+      );
 
-    clearCart();
-    navigate("/orders"); // go to order history
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Backend error: ${res.status} - ${errorText}`);
+      }
+
+      if (!res.ok) {
+  const errorText = await res.text();
+  throw new Error(`Backend error: ${res.status} - ${errorText}`);
+}
+
+await res.json();
+toast.success("✅ Order placed successfully! Redirecting...");
+
+    // 🕒 Redirect after 5 seconds
+    setTimeout(() => {
+      clearCart();
+      navigate("/productlist");
+    }, 5000);
+    } catch (err) {
+      console.warn("⚠️ Order failed:", err.message);
+
+      // Fallback local save
+      const offlineOrders =
+        JSON.parse(localStorage.getItem("offlineOrders")) || [];
+      offlineOrders.push(newOrder);
+      localStorage.setItem("offlineOrders", JSON.stringify(offlineOrders));
+
+      toast.error("⚠️ Backend failed. Order saved locally.");
+      clearCart();
+      navigate("/orders");
+    }
   };
 
   if (!cart.length) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-lg text-gray-600">Your cart is empty. Add products first.</p>
+      <div className="min-h-screen flex items-center justify-center gradient-bg">
+        <p className="text-lg gold-text animate-pop">
+          Your cart is empty. Please add products first.
+        </p>
       </div>
     );
   }
 
-  const total = cart.reduce((sum, item) => sum + item.price, 0);
-
   return (
-    <div className="min-h-screen bg-gray-100 py-10">
-      <div className="max-w-3xl mx-auto bg-white shadow rounded-lg p-8">
-        <h2 className="text-2xl font-bold mb-6">Checkout</h2>
+    <div className="min-h-screen gradient-bg py-10 px-4">
+      <div className="max-w-3xl mx-auto bg-white dark:bg-[var(--card-bg)] shadow-xl rounded-lg p-8 border border-[var(--secondary)]">
+        <h2 className="text-3xl font-bold gold-text mb-6 text-center">
+          Checkout
+        </h2>
 
         {/* Order Summary */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold">Order Summary</h3>
+          <h3 className="text-lg font-semibold mb-2">Order Summary</h3>
           <ul className="divide-y">
             {cart.map((item, idx) => (
               <li key={idx} className="py-2 flex justify-between">
-                <span>{item.name}</span>
-                <span>₹{item.price}</span>
+                <span>
+                  {item.name} × {item.quantity || 1}
+                  {item.selectedSize && (
+                    <span className="block text-sm text-gray-500">
+                      Size: {item.selectedSize}
+                    </span>
+                  )}
+                </span>
+                <span>
+                  ₹{(item.finalPrice || item.price) * (item.quantity || 1)}
+                </span>
               </li>
             ))}
           </ul>
@@ -92,7 +156,7 @@ const Checkout = () => {
 
         {/* Delivery Details */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold">Delivery Details</h3>
+          <h3 className="text-lg font-semibold mb-2">Delivery Details</h3>
           <input
             type="text"
             placeholder="Phone Number"
@@ -111,39 +175,30 @@ const Checkout = () => {
 
         {/* Payment */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold">Payment</h3>
-          <label className="block">
-            <input type="radio" name="pm" value="Credit Card"
-              checked={paymentMethod === "Credit Card"}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-              className="mr-2"
-            />
-            💳 Credit Card
-          </label>
-          <label className="block">
-            <input type="radio" name="pm" value="UPI"
-              checked={paymentMethod === "UPI"}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-              className="mr-2"
-            />
-            💰 UPI / Netbanking
-          </label>
-          <label className="block">
-            <input type="radio" name="pm" value="Cash on Delivery"
-              checked={paymentMethod === "Cash on Delivery"}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-              className="mr-2"
-            />
-            📦 Cash on Delivery
-          </label>
+          <h3 className="text-lg font-semibold mb-2">Payment</h3>
+          {["Credit Card", "UPI", "Cash on Delivery"].map((method) => (
+            <label key={method} className="block">
+              <input
+                type="radio"
+                name="pm"
+                value={method}
+                checked={paymentMethod === method}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="mr-2"
+              />
+              {method}
+            </label>
+          ))}
         </div>
 
-        <button
-          onClick={handlePlaceOrder}
-          className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700"
-        >
-          Place Order
-        </button>
+        <div>
+          <button
+            onClick={handlePlaceOrder}
+            className="w-full bg-[var(--primary)] text-white py-3 rounded-lg hover:opacity-90 transition"
+          >
+            Place Order
+          </button>
+        </div>
       </div>
     </div>
   );

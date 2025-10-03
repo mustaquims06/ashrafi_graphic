@@ -1,4 +1,3 @@
-// src/context/CartContext.js
 import React, { createContext, useContext, useState } from "react";
 
 const CartContext = createContext();
@@ -6,11 +5,22 @@ const CartContext = createContext();
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
 
+  // Helper to calculate discounted price
+  const calculateFinalPrice = (product) => {
+    return product.offer
+      ? Math.round(product.price - (product.price * parseFloat(product.offer)) / 100)
+      : product.price;
+  };
+
   // ➕ Add an item (or bump quantity if already in cart with same size)
   const addToCart = (product) => {
+    const finalPrice = calculateFinalPrice(product);
+
     setCart((prev) => {
       const idx = prev.findIndex(
-        (it) => it.id === product.id && it.selectedSize === product.selectedSize
+        (it) =>
+          (it._id || it.id) === (product._id || product.id) &&
+          it.selectedSize === product.selectedSize
       );
 
       if (idx > -1) {
@@ -19,7 +29,14 @@ export function CartProvider({ children }) {
         updated[idx].quantity += product.quantity ?? 1;
         return updated;
       } else {
-        return [...prev, { ...product, quantity: product.quantity ?? 1 }];
+        return [
+          ...prev,
+          {
+            ...product,
+            finalPrice, // ✅ Store discounted price at the time of adding
+            quantity: product.quantity ?? 1,
+          },
+        ];
       }
     });
   };
@@ -28,9 +45,8 @@ export function CartProvider({ children }) {
   const removeFromCart = (id, selectedSize) => {
     setCart((prev) =>
       prev.reduce((acc, item) => {
-        if (item.id === id && item.selectedSize === selectedSize) {
+        if ((item._id || item.id) === id && item.selectedSize === selectedSize) {
           if (item.quantity > 1) {
-            // decrease only one
             acc.push({ ...item, quantity: item.quantity - 1 });
           }
           // if quantity = 1 → don't push (remove it)
@@ -42,12 +58,12 @@ export function CartProvider({ children }) {
     );
   };
 
-  // ✏️ Update a product's quantity directly (e.g. from quantity input box)
+  // ✏️ Update a product's quantity directly
   const updateQuantity = (id, selectedSize, quantity) => {
     setCart((prev) =>
       prev
         .map((item) =>
-          item.id === id && item.selectedSize === selectedSize
+          (item._id || item.id) === id && item.selectedSize === selectedSize
             ? { ...item, quantity: Math.max(1, quantity) }
             : item
         )
@@ -55,14 +71,17 @@ export function CartProvider({ children }) {
     );
   };
 
-  // 💰 Calculate total price
+  // 💰 Calculate total price (always use finalPrice)
   const getCartTotal = () =>
-    cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    cart.reduce(
+      (sum, item) => sum + ((item.finalPrice ?? item.price) * item.quantity),
+      0
+    );
 
   // 🧹 Empty entire cart
   const clearCart = () => setCart([]);
 
-  // 🛒 Show total items count (useful for nav badge)
+  // 🛒 Show total items count
   const getCartItemsCount = () =>
     cart.reduce((sum, item) => sum + item.quantity, 0);
 

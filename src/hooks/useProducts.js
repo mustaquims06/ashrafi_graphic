@@ -1,71 +1,26 @@
-import { useState, useEffect } from 'react';
-import { products, reviews, userPurchases, currentUser } from '../data/mockData';
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export const useProducts = () => {
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    // Simulate API loading time
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  return { products, loading };
-};
 
-export const useProduct = (productId) => {
-  const [loading, setLoading] = useState(true);
-  const [product, setProduct] = useState(null);
-  
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const foundProduct = products.find(p => p.id === parseInt(productId));
-      setProduct(foundProduct);
-      setLoading(false);
-    }, 300);
-    
-    return () => clearTimeout(timer);
-  }, [productId]);
-  
-  return { product, loading };
-};
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
-export const useReviews = (productId) => {
-  const [loading, setLoading] = useState(true);
-  const [productReviews, setProductReviews] = useState([]);
-  
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const productReviewsList = reviews[parseInt(productId)] || [];
-      setProductReviews(productReviewsList);
-      setLoading(false);
-    }, 300);
-    
-    return () => clearTimeout(timer);
-  }, [productId]);
-  
-  const addReview = (newReview) => {
-    const reviewWithId = {
-      ...newReview,
-      id: Date.now().toString(),
-      userId: currentUser.id,
-      userName: currentUser.name,
-      date: new Date(),
-      verified: true
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/products`);
+        setProducts(res.data || []);
+      } catch (err) {
+        console.error("❌ Failed to fetch products:", err);
+      } finally {
+        setLoading(false);
+      }
     };
-    setProductReviews(prev => [reviewWithId, ...prev]);
-  };
-  
-  return { reviews: productReviews, loading, addReview };
-};
 
-export const useUserPurchases = () => {
-  const hasPurchased = (productId) => {
-    return userPurchases.some(purchase => purchase.productId === productId);
-  };
-  
-  return { hasPurchased, purchases: userPurchases };
+    fetchProducts();
+  }, [API_URL]);
+
+  return { products, loading };
 };

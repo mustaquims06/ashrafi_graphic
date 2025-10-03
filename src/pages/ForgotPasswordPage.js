@@ -1,99 +1,148 @@
-// src/pages/ForgotPasswordPage.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 export default function ForgotPasswordPage() {
-  const [step, setStep] = useState(1); // Step 1 = enter email, Step 2 = reset password
+  const [step, setStep] = useState(1); // 1=email, 2=otp, 3=reset
   const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [resetToken, setResetToken] = useState("");
+  const [cooldown, setCooldown] = useState(0);
   const navigate = useNavigate();
 
-  const handleCheckEmail = (e) => {
-    e.preventDefault();
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-
-    const user = users.find((u) => u.email === email);
-
-    if (!user) {
-      alert("❌ No account found with this email!");
-      return;
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      return () => clearTimeout(timer);
     }
+  }, [cooldown]);
 
-    // ✅ Email matched → go to next step
-    setStep(2);
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:5000/api/otp/send-otp", { email });
+      toast.success("OTP sent to your email 📩");
+      setCooldown(30); // 30s cooldown
+      setStep(2);
+    } catch (err) {
+        toast.error(err.response?.data?.error || "❌ Failed to send OTP");
+    }
   };
 
-  const handleResetPassword = (e) => {
+  const handleVerifyOtp = async (e) => {
     e.preventDefault();
-
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    const userIndex = users.findIndex((u) => u.email === email);
-
-    if (userIndex === -1) {
-      alert("❌ User data lost, please try again");
-      setStep(1);
-      return;
+    try {
+      const res = await axios.post("http://localhost:5000/api/otp/verify-otp", { email, otp });
+      toast.success("OTP verified ✅");
+      setResetToken(res.data.resetToken);
+      setStep(3);
+    } catch (err) {
+      toast.error(err.response?.data?.error || "❌ Invalid OTP");
     }
+  };
 
-    // ✅ Update password
-    users[userIndex].password = newPassword;
-    localStorage.setItem("users", JSON.stringify(users));
+  const handleResendOtp = async () => {
+    try {
+      await axios.post("http://localhost:5000/api/otp/send-otp", { email });
+      toast.success("New OTP sent 🔄");
+      setCooldown(30);
+    } catch (err) {
+      toast.error(err.response?.data?.error || "❌ Failed to resend OTP");
+    }
+  };
 
-    alert("✅ Password reset successful! Now login with your new password.");
-    navigate("/login");
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:5000/api/auth/reset-password", {
+        email,
+        newPassword,
+        resetToken,
+      });
+      toast.success("Password reset successful 🎉 Please login.");
+      navigate("/login");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "❌ Reset failed");
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen gradient-bg px-4">
       <div className="bg-white dark:bg-[var(--card-bg)] shadow-lg rounded-2xl p-8 w-full max-w-md border border-[var(--secondary)]">
-        <h2 className="text-3xl font-bold gold-text text-center mb-6">
-          Forgot Password
-        </h2>
+        <h2 className="text-3xl font-bold gold-text text-center mb-6">Forgot Password</h2>
 
-        {/* Step 1: Check Email */}
+        {/* Step 1: Send OTP */}
         {step === 1 && (
-          <form onSubmit={handleCheckEmail} className="space-y-4">
+          <form onSubmit={handleSendOtp} className="space-y-4">
             <input
               type="email"
-              placeholder="Enter your registered email"
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-[var(--primary)]"
+              className="w-full border px-3 py-2 rounded"
             />
-            <button
-              type="submit"
-              className="w-full bg-[var(--primary)] text-white py-2 rounded-lg hover:opacity-90 transition"
-            >
-              Verify Email
+            <button type="submit" className="w-full bg-[var(--primary)] text-white py-2 rounded-lg">
+              Send OTP
             </button>
           </form>
         )}
 
-        {/* Step 2: Reset Password */}
+        {/* Step 2: Verify OTP */}
         {step === 2 && (
+          <form onSubmit={handleVerifyOtp} className="space-y-4">
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              required
+              className="w-full border px-3 py-2 rounded"
+            />
+
+            <div className="flex justify-between items-center">
+              <button
+                type="submit"
+                className="bg-[var(--primary)] text-white py-2 px-4 rounded-lg hover:opacity-90"
+              >
+                Verify OTP
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={cooldown > 0}
+                className={`py-2 px-4 rounded-lg transition ${
+                  cooldown > 0
+                    ? "bg-gray-400 cursor-not-allowed text-white"
+                    : "bg-gray-500 hover:opacity-90 text-white"
+                }`}
+              >
+                {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend OTP"}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Step 3: Reset Password */}
+        {step === 3 && (
           <form onSubmit={handleResetPassword} className="space-y-4">
-            <p className="text-center text-sm text-[var(--secondary)] mb-2">
-              ✅ Email verified: <span className="font-medium">{email}</span>
-            </p>
             <input
               type="password"
               placeholder="Enter new password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
-              className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-[var(--primary)]"
+              className="w-full border px-3 py-2 rounded"
             />
-            <button
-              type="submit"
-              className="w-full bg-[var(--primary)] text-white py-2 rounded-lg hover:opacity-90 transition"
-            >
+            <button type="submit" className="w-full bg-[var(--primary)] text-white py-2 rounded-lg">
               Reset Password
             </button>
           </form>
         )}
 
-        {/* Back to Login Link */}
         <p className="text-center text-sm text-[var(--secondary)] mt-4">
           Remembered your password?{" "}
           <Link to="/login" className="text-[var(--primary)] hover:underline">

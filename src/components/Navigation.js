@@ -1,7 +1,7 @@
 // src/components/Navigation.js
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ShoppingCart, Heart, Package, User } from "lucide-react";
+import { ShoppingCart, Heart, User } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext"; 
