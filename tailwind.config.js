@@ -15,7 +15,7 @@ module.exports = {
         card: 'var(--card-bg)',
       },
       fontFamily: {
-        graphic: ['Poppins', 'sans-serif'],
+        graphic: ['Rubik', 'sans-serif'],
       },
       textColor: {
         primary: 'var(--text-color)',

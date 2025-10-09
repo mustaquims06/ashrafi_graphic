@@ -1,6 +1,7 @@
 // src/pages/Wishlist.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import Navigation from '../components/Navigation';
@@ -16,7 +17,7 @@ export default function Wishlist() {
   const handleAddToCart = (product) => {
     const p = { ...product, selectedSize: product.defaultSize };
     addToCart(p);
-    alert(`Added "${p.name}" to cart (size ${p.selectedSize})!`);
+    toast.success(`Added "${p.name}" to cart (size ${p.selectedSize})!`);
   };
 
   const handleMoveToCart = (product) => {

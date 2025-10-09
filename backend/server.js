@@ -17,23 +17,61 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 // ✅ CORS
 app.use(
   cors({
-    origin: "http://localhost:3000", // frontend URL in dev
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
     credentials: true,
   })
 );
-
 // ✅ Routes import
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/products");
 const orderRoutes = require("./routes/orders");
 const reviewRoutes = require("./routes/reviews");
 const otpRoutes = require("./routes/otpRoutes");
+const contactRoutes = require("./routes/contact");
+const paymentRoutes = require("./routes/payment");
+const userRoutes = require("./routes/user");
+
+
 
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/otp", otpRoutes);
+app.use("/api/contact", contactRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/payment", paymentRoutes);
+
+
+// Items endpoints (in-memory for demo/testing)
+app.post("/api/items", (req, res) => {
+  const newItem = {
+    id: items.length + 1,
+    name: req.body.name,
+  };
+  items.push(newItem);
+  res.status(201).json(newItem);
+});
+
+app.put("/api/items/:id", (req, res) => {
+  const item = items.find((i) => i.id === parseInt(req.params.id, 10));
+  if (item) {
+    item.name = req.body.name;
+    return res.json(item);
+  }
+  res.status(404).json({ error: "Item not found" });
+});
+
+app.delete("/api/items/:id", (req, res) => {
+  const index = items.findIndex((i) => i.id === parseInt(req.params.id, 10));
+  if (index !== -1) {
+    items.splice(index, 1);
+    return res.json({ message: "Item deleted" });
+  }
+  res.status(404).json({ error: "Item not found" });
+});
+
+
 
 // ✅ Health check
 app.get("/", (req, res) => {

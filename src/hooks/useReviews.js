@@ -1,6 +1,7 @@
 // src/hooks/useReviews.js
 import { useState, useEffect } from "react";
 import axios from "axios";
+import toast from 'react-hot-toast';
 
 export const useReviews = (productId) => {
   const [reviews, setReviews] = useState([]);
@@ -34,7 +35,7 @@ export const useReviews = (productId) => {
   const addReview = async (comment, rating) => {
     const token = localStorage.getItem("token"); // ✅ read automatically
     if (!token) {
-      alert("⚠️ Please login first");
+      toast.warning("Please login first");
       return;
     }
     try {

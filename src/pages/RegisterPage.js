@@ -1,6 +1,7 @@
 // src/pages/RegisterPage.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
   const [username, setUsername] = useState("");
@@ -14,7 +15,7 @@ const RegisterPage = () => {
     const newUser = { username, password, isAdmin: false };
     localStorage.setItem("currentUser", JSON.stringify(newUser));
 
-    alert("✅ Registration successful! You are now logged in.");
+    toast.success("Registration successful! You are now logged in.");
     navigate("/ProductList"); // after registration, go to products
   };
 

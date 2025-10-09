@@ -29,7 +29,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
     if (!currentUser || !currentUser.isAdmin) {
-      alert("⛔ Access denied!");
+      toast.error("Access denied!");
       navigate("/login");
       return;
     }
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
   const handleAddOrUpdateProduct = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.price) {
-      alert("⚠️ Name & Price required");
+      toast.warning("Name & Price required");
       return;
     }
 
@@ -117,17 +117,17 @@ export default function AdminDashboard() {
         setAdminProducts((prev) =>
           prev.map((p) => (p._id === editId ? res.data : p))
         );
-        alert("✅ Product updated!");
+        toast.success("Product updated!");
       } else {
         res = await axios.post(`${API_URL}/products`, fd, {
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
         });
         setAdminProducts((prev) => [...prev, res.data]);
-        alert("✅ Product added!");
+        toast.success("Product added!");
       }
     } catch (err) {
       console.error("Save failed:", err.response?.data || err.message);
-      alert("⚠️ Failed to save");
+      toast.error("Failed to save");
     }
 
     setFormData({ name: "", description: "", price: "", images: [], sizes: [], offer: "" });
@@ -150,10 +150,10 @@ export default function AdminDashboard() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAdminProducts((prev) => prev.filter((p) => p._id !== id));
-      alert("✅ Product deleted!");
+      toast.success("Product deleted!");
     } catch (err) {
       console.error("Delete failed:", err.response?.data || err.message);
-      alert("⚠️ Failed to delete");
+      toast.error("Failed to delete");
     }
   };
 

@@ -1,6 +1,7 @@
 // src/pages/ProductsPage.js
 import React, { useState, useEffect } from 'react';
 import ScrollAnimation from '../components/ScrollAnimation';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 const ProductsPage = () => {
@@ -35,7 +36,7 @@ const ProductsPage = () => {
   };
 
   const handlePayment = (method) => {
-    alert(`Payment successful via ${method}! Order for ${selectedProduct.name} has been placed.`);
+    toast.success(`Payment successful via ${method}! Order for ${selectedProduct.name} has been placed.`);
     setShowPayment(false);
     setSelectedProduct(null);
   };

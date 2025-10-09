@@ -1,6 +1,7 @@
 // src/pages/ContactPage.js
 import React, { useState } from "react";
 import ScrollAnimation from "../components/ScrollAnimation";
+import toast from 'react-hot-toast';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -19,11 +20,30 @@ const ContactPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Success show
-    setShowModal(true);
-    setFormData({ name: "", email: "", subject: "", message: "" }); // Reset
+    try {
+      const response = await fetch('http://localhost:5000/api/contact/apply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Server response:', data); // Debug log
+
+      setShowModal(true);
+      setFormData({ name: "", email: "", subject: "", message: "" }); // Reset
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Error submitting form. Please try again. ' + error.message);
+    }
   };
 
   // Dropdown options

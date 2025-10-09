@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import toast from "react-hot-toast";
+import RazorpayPayment from "../components/RazorpayPayment";
 
 const Checkout = () => {
   const { cart, clearCart } = useCart();
@@ -175,29 +176,54 @@ toast.success("✅ Order placed successfully! Redirecting...");
 
         {/* Payment */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-2">Payment</h3>
-          {["Credit Card", "UPI", "Cash on Delivery"].map((method) => (
-            <label key={method} className="block">
+          <h3 className="text-lg font-semibold mb-2">Payment Method</h3>
+          <div className="space-y-2">
+            <label className="block">
               <input
                 type="radio"
                 name="pm"
-                value={method}
-                checked={paymentMethod === method}
+                value="Razorpay"
+                checked={paymentMethod === "Razorpay"}
                 onChange={(e) => setPaymentMethod(e.target.value)}
                 className="mr-2"
               />
-              {method}
+              Pay Online (Credit/Debit Card, UPI, Netbanking)
             </label>
-          ))}
+            <label className="block">
+              <input
+                type="radio"
+                name="pm"
+                value="COD"
+                checked={paymentMethod === "COD"}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="mr-2"
+              />
+              Cash on Delivery
+            </label>
+          </div>
         </div>
 
         <div>
-          <button
-            onClick={handlePlaceOrder}
-            className="w-full bg-[var(--primary)] text-white py-3 rounded-lg hover:opacity-90 transition"
-          >
-            Place Order
-          </button>
+          {paymentMethod === "Razorpay" ? (
+            <RazorpayPayment
+              amount={total}
+              onSuccess={(response) => {
+                toast.success("Payment successful!");
+                handlePlaceOrder();
+              }}
+              onFailure={(error) => {
+                toast.error("Payment failed. Please try again.");
+                console.error("Payment failed:", error);
+              }}
+            />
+          ) : (
+            <button
+              onClick={handlePlaceOrder}
+              className="w-full bg-[var(--primary)] text-white py-3 rounded-lg hover:opacity-90 transition"
+            >
+              Place Order
+            </button>
+          )}
         </div>
       </div>
     </div>
