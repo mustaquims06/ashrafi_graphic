@@ -1,11 +1,30 @@
 // src/pages/LoginPage.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
 
 export default function LoginPage() {
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
+      const res = await axios.post("http://localhost:5000/api/auth/google", {
+        tokenId: credentialResponse.credential
+      });
+
+      const currentUser = res.data;
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      login(currentUser);
+      toast.success("Login successful with Google ✨");
+      navigate(currentUser.isAdmin ? "/admin-dashboard" : from, { replace: true });
+    } catch (err) {
+      console.error("Google login error:", err);
+      toast.error("Google login failed. Please try again.");
+    }
+  };
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -89,6 +108,36 @@ export default function LoginPage() {
             Login
           </button>
         </form>
+
+        <div className="mt-4">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white dark:bg-[var(--card-bg)] text-gray-500">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => {
+                  toast.error('Google login failed');
+                }}
+                useOneTap
+                theme="outline"
+                size="large"
+                width="100%"
+                text="signin_with"
+                shape="rectangular"
+              />
+            </GoogleOAuthProvider>
+          </div>
+        </div>
 
         <p className="text-center text-sm mt-3">
           <Link to="/forgot-password" className="text-[var(--primary)] hover:underline">

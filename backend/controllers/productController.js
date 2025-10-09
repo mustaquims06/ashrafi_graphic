@@ -1,7 +1,7 @@
 // controllers/productController.js
-import Product from "../models/Product.js";
+const Product = require("../models/Product");
 
-export const getProducts = async (req, res) => {
+const getProducts = async (req, res) => {
   try {
     const products = await Product.find(); // admin sees all products
     res.json(products);

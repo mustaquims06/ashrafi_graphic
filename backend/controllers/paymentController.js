@@ -2,14 +2,28 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 
 // Initialize Razorpay with your key_id and key_secret
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+let razorpay;
+try {
+    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+        razorpay = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_KEY_SECRET
+        });
+    }
+} catch (error) {
+    console.error('Failed to initialize Razorpay:', error);
+}
 
 // Create a new order
 exports.createOrder = async (req, res) => {
     try {
+        if (!razorpay) {
+            return res.status(500).json({
+                success: false,
+                message: 'Razorpay is not configured. Please check your environment variables.'
+            });
+        }
+
         const { amount, currency = "INR" } = req.body;
         
         const options = {
