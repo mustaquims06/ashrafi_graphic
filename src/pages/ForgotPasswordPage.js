@@ -22,12 +22,27 @@ export default function ForgotPasswordPage() {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/otp/send-otp", { email });
-      toast.success("OTP sent to your email 📩");
+      if (!email) {
+        toast.error("Please enter your email address");
+        return;
+      }
+      
+      const baseUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+      await axios.post(`${baseUrl}/api/otp/send-otp`, { email });
+      
+      toast.success("OTP has been sent to your email 📩");
+      toast.custom((t) => (
+        <div className="bg-white p-4 rounded-lg shadow-lg">
+          <p>Please check your inbox and spam folder</p>
+        </div>
+      ), { duration: 5000 });
+      
       setCooldown(30); // 30s cooldown
       setStep(2);
     } catch (err) {
-        toast.error(err.response?.data?.error || "❌ Failed to send OTP");
+      console.error("Send OTP error:", err);
+      const errorMessage = err.response?.data?.error || "Failed to send OTP. Please try again.";
+      toast.error(`❌ ${errorMessage}`);
     }
   };
 

@@ -2,6 +2,16 @@ const Otp = require("../models/Otp");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
+const transporter = require('../config/transporter');
+
+// Verify email configuration on startup
+transporter.verify(function (error, success) {
+  if (error) {
+    console.error('Email configuration error:', error);
+  } else {
+    console.log('Email server is ready to send messages');
+  }
+});
 
 // Send OTP
 exports.sendOtp = async (req, res) => {
@@ -28,20 +38,26 @@ exports.sendOtp = async (req, res) => {
       attempts: existing ? existing.attempts + 1 : 1,
     });
 
-    // setup transporter
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    // use configured transporter
+    const transporter = require('../config/transporter');
 
+    // send email with OTP
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: `"Ashrafi Graphics" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "Password Reset OTP",
-      text: `Your OTP is ${otp}. It is valid for 5 minutes.`,
+      subject: "Password Reset OTP - Ashrafi Graphics",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #333;">Password Reset Request</h2>
+          <p>You have requested to reset your password. Here is your OTP:</p>
+          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
+            ${otp}
+          </div>
+          <p>This OTP is valid for 5 minutes only.</p>
+          <p>If you didn't request this password reset, please ignore this email.</p>
+          <p style="color: #666; margin-top: 20px;">Best regards,<br>Ashrafi Graphics Team</p>
+        </div>
+      `,
     });
 
     res.json({ message: "✅ OTP sent successfully" });

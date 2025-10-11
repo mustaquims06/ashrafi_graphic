@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
 
 export default function SignupPage() {
   const [step, setStep] = useState(1); // 1=signup form, 2=otp verify
@@ -94,6 +96,24 @@ export default function SignupPage() {
     }
   };
 
+  // Google Signup Handler
+  const handleGoogleSignup = async (credentialResponse) => {
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
+      const res = await axios.post("http://localhost:5000/api/auth/google", {
+        tokenId: credentialResponse.credential
+      });
+      const currentUser = res.data;
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      login(currentUser);
+      toast.success("Signup successful with Google ✨");
+      navigate(currentUser.isAdmin ? "/admin-dashboard" : "/productlist", { replace: true });
+    } catch (err) {
+      console.error("Google signup error:", err);
+      toast.error("Google signup failed. Please try again.");
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen gradient-bg px-4">
       <div className="bg-white dark:bg-[var(--card-bg)] shadow-lg rounded-2xl p-8 w-full max-w-md border border-[var(--secondary)]">
@@ -103,65 +123,95 @@ export default function SignupPage() {
 
         {/* Step 1: Signup Form */}
         {step === 1 && (
-          <form onSubmit={handleSignupRequest} className="space-y-4">
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-[var(--primary)]"
-              placeholder="Full Name"
-              required
-            />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-[var(--primary)]"
-              placeholder="Email"
-              required
-            />
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-[var(--primary)]"
-              placeholder="Phone Number"
-              required
-            />
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-[var(--primary)]"
-              placeholder="Address"
-            />
-
-            {/* Password */}
-            <div className="relative">
+          <>
+            <form onSubmit={handleSignupRequest} className="space-y-4">
               <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-[var(--primary)]"
-                placeholder="Password"
+                placeholder="Full Name"
                 required
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[var(--secondary)] hover:text-[var(--primary)]"
-              >
-                {showPassword ? "🙈 Hide" : "👁️ Show"}
-              </button>
-            </div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-[var(--primary)]"
+                placeholder="Email"
+                required
+              />
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-[var(--primary)]"
+                placeholder="Phone Number"
+                required
+              />
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-[var(--primary)]"
+                placeholder="Address"
+              />
 
-            <button
-              type="submit"
-              className="w-full bg-[var(--primary)] text-white py-2 rounded-lg hover:opacity-90 transition"
-            >
-              Signup
-            </button>
-          </form>
+              {/* Password */}
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-[var(--primary)]"
+                  placeholder="Password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[var(--secondary)] hover:text-[var(--primary)]"
+                >
+                  {showPassword ? "🙈 Hide" : "👁️ Show"}
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-[var(--primary)] text-white py-2 rounded-lg hover:opacity-90 transition"
+              >
+                Signup
+              </button>
+            </form>
+            <div className="mt-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white dark:bg-[var(--card-bg)] text-gray-500">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+              <div className="mt-4">
+                <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+                  <GoogleLogin
+                    onSuccess={handleGoogleSignup}
+                    onError={() => {
+                      toast.error('Google signup failed');
+                    }}
+                    useOneTap
+                    theme="outline"
+                    size="large"
+                    width="100%"
+                    text="signup_with"
+                    shape="rectangular"
+                  />
+                </GoogleOAuthProvider>
+              </div>
+            </div>
+          </>
         )}
 
         {/* Step 2: OTP Verification */}

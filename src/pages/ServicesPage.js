@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { Toaster, toast } from "react-hot-toast";
 // import music from "../assets/music companys.jpg";
 
 // import logos at the top
@@ -77,9 +78,11 @@ function ServicePopup({ service, onClose }) {
             <button
               className="bg-primary text-white px-6 py-3 rounded-lg shadow-lg hover:bg-opacity-90 transition-colors duration-300"
               onClick={() => {
-                if (window.confirm(`Apply for ${service.title}?`)) {
-                  navigate("/contact");
-                }
+                toast.success(`Redirecting to apply for ${service.title}...`);
+                // Add a short delay to allow the user to see the toast
+                setTimeout(() => {
+                    navigate("/contact");
+                }, 1500);
               }}
             >
               <p className="text-sm text-[var(--text-color)] flex-1">Apply</p>
@@ -254,6 +257,9 @@ export default function ServicesPage() {
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-8 lg:px-16 relative bg-[var(--bg-color)] transition-colors duration-500">
+      {/* Toaster for notifications */}
+      <Toaster position="top-center" />
+      
       {/* Background Waves */}
       <div className="hero-waves pointer-events-none">
         <div className="wave wave-1" />
