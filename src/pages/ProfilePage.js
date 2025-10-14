@@ -15,7 +15,6 @@ export default function ProfilePage() {
       navigate("/login");
       return;
     }
-
     setUser(currentUser);
     setAddress(currentUser.address || "");
     setPhone(currentUser.phone || "");
@@ -58,8 +57,7 @@ export default function ProfilePage() {
             </button>
           </div>
           <div className="mx-auto w-24 h-24 rounded-full flex items-center justify-center text-4xl font-bold bg-white text-[var(--primary)] shadow-lg">
-            {user.username?.charAt(0).toUpperCase() ||
-              user.name?.charAt(0).toUpperCase()}
+            {user.username?.charAt(0).toUpperCase() || user.name?.charAt(0).toUpperCase()}
           </div>
           <h2 className="mt-4 font-bold text-2xl">
             {user.username || user.name}

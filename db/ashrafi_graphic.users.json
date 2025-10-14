@@ -184,17 +184,18 @@
     "$oid": "68dd0d5ed32131ed92f32cbd"
   },
   "username": "Admin",
-  "email": "naiksakshi320@gmail.com",
-  "password": "$2b$10$rIBiTgOzQtSMWu5SdZD28uWI3Ty0/AXYjswY/juyb8/ElxJW/0w6K",
+  "email": "ashrafigraphicservices@gmail.com",
+  "password": "$2b$10$msPwgmgH2CHSrD9OEBbZEuRRDNS2VodgCcoKpbJVxdBjnb4OJF37O",
   "isAdmin": true,
   "phone": "1234567890",
   "createdAt": {
     "$date": "2025-10-01T11:15:42.409Z"
   },
   "updatedAt": {
-    "$date": "2025-10-01T11:15:42.409Z"
+    "$date": "2025-10-11T11:28:52.632Z"
   },
-  "__v": 0
+  "__v": 0,
+  "isVerified": false
 },
 {
   "_id": {
@@ -219,14 +220,15 @@
   },
   "username": "mustaquim",
   "email": "mustaquims06@gmail.com",
-  "password": "$2b$10$FMSk6U5FV.o.4/d8NJ13duKpMxwibDh1OLo/Yjg5VGjqpRtM9E3f6",
+  "password": "$2b$10$RYZbDrFRN/XvYq7QAp/7kuMVou6RhYazUJpOyMyRH8qCdvkOydbnW",
   "isAdmin": false,
   "phone": "8697412308",
   "createdAt": {
     "$date": "2025-10-01T18:31:22.706Z"
   },
   "updatedAt": {
-    "$date": "2025-10-01T18:31:22.706Z"
+    "$date": "2025-10-12T09:02:53.811Z"
   },
-  "__v": 0
+  "__v": 0,
+  "isVerified": false
 }]

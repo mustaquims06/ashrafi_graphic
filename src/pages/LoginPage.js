@@ -122,11 +122,12 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-4">
-            <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+            <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || "556055977337-tcr70k44mtvdkv1eof029e8aobd0bteu.apps.googleusercontent.com"}>
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
-                onError={() => {
-                  toast.error('Google login failed');
+                onError={(error) => {
+                  console.error("Google login error:", error);
+                  toast.error('Google login failed. Please try again.');
                 }}
                 useOneTap
                 theme="outline"

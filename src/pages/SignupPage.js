@@ -100,9 +100,11 @@ export default function SignupPage() {
   const handleGoogleSignup = async (credentialResponse) => {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
-      const res = await axios.post("http://localhost:5000/api/auth/google", {
+      const baseUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+      const res = await axios.post(`${baseUrl}/api/auth/google`, {
         tokenId: credentialResponse.credential
       });
+
       const currentUser = res.data;
       localStorage.setItem("currentUser", JSON.stringify(currentUser));
       login(currentUser);
@@ -182,36 +184,39 @@ export default function SignupPage() {
               >
                 Signup
               </button>
-            </form>
-            <div className="mt-4">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white dark:bg-[var(--card-bg)] text-gray-500">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
+
               <div className="mt-4">
-                <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
-                  <GoogleLogin
-                    onSuccess={handleGoogleSignup}
-                    onError={() => {
-                      toast.error('Google signup failed');
-                    }}
-                    useOneTap
-                    theme="outline"
-                    size="large"
-                    width="100%"
-                    text="signup_with"
-                    shape="rectangular"
-                  />
-                </GoogleOAuthProvider>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white dark:bg-[var(--card-bg)] text-gray-500">
+                      Or continue with
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || "556055977337-tcr70k44mtvdkv1eof029e8aobd0bteu.apps.googleusercontent.com"}>
+                    <GoogleLogin
+                      onSuccess={handleGoogleSignup}
+                      onError={(error) => {
+                        console.error("Google signup error:", error);
+                        toast.error('Google signup failed. Please try again.');
+                      }}
+                      useOneTap
+                      theme="outline"
+                      size="large"
+                      width="100%"
+                      text="signup_with"
+                      shape="rectangular"
+                    />
+                  </GoogleOAuthProvider>
+                </div>
               </div>
-            </div>
-          </>
+            </form>
+            </>
         )}
 
         {/* Step 2: OTP Verification */}
@@ -258,4 +263,5 @@ export default function SignupPage() {
       </div>
     </div>
   );
+
 }

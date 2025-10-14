@@ -4,19 +4,30 @@ const crypto = require('crypto');
 // Initialize Razorpay with your key_id and key_secret
 let razorpay;
 try {
-    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
-        razorpay = new Razorpay({
-            key_id: process.env.RAZORPAY_KEY_ID,
-            key_secret: process.env.RAZORPAY_KEY_SECRET
-        });
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+        console.error('Razorpay credentials are missing in environment variables');
+        throw new Error('Missing Razorpay credentials');
     }
+    razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET
+    });
+    console.log('Razorpay initialized successfully');
 } catch (error) {
-    console.error('Failed to initialize Razorpay:', error);
+    console.error('Failed to initialize Razorpay:', error.message);
 }
 
 // Create a new order
 exports.createOrder = async (req, res) => {
     try {
+        // Check if user is authenticated
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
         if (!razorpay) {
             return res.status(500).json({
                 success: false,
@@ -38,8 +49,9 @@ exports.createOrder = async (req, res) => {
             order
         });
     } catch (error) {
-        console.error('Error creating order:', error);
-        res.status(500).json({
+        console.error('Error creating order:', error.response ? error.response.body : error);
+        const status = error.statusCode || 500;
+        res.status(status).json({
             success: false,
             message: 'Could not create order'
         });

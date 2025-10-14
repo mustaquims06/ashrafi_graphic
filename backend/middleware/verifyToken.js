@@ -8,21 +8,25 @@ const Order = require("../models/Order");
  * Verifies JWT and attaches user object to req.user
  */
 const verifyToken = async (req, res, next) => {
-  const authHeader = req.headers.authorization || req.headers.Authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
-  }
+  try {
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "No token provided" });
+    }
 
-  const token = authHeader.split(" ")[1];
-  if (!token) return res.status(401).json({ message: "No token provided" });
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded || !decoded._id) {
+    if (!decoded || (!decoded._id && !decoded.id)) {
       return res.status(401).json({ message: "Invalid token payload" });
     }
 
-    const user = await User.findById(decoded._id).select("-password");
+    const userId = decoded._id || decoded.id;
+    const user = await User.findById(userId).select("-password");
     if (!user) return res.status(401).json({ message: "User not found" });
 
     req.user = user;
@@ -34,7 +38,17 @@ const verifyToken = async (req, res, next) => {
     }
     return res.status(401).json({ message: "Token verification failed" });
   }
+} catch (err) {
+  console.error("Outer verifyToken error:", err);
+  return res.status(500).json({ message: "Internal server error during token verification" });
+  }
 };
+
+/**
+ * verifyAdmin
+ * Checks if user is admin
+ */
+
 
 /**
  * verifyAdmin

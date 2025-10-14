@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from '../api/axiosInstance';
+import axiosInstance from '../api/axiosInstance';
 
 const RazorpayPayment = ({ amount, onSuccess, onFailure }) => {
     const loadScript = (src) => {
@@ -25,21 +25,43 @@ const RazorpayPayment = ({ amount, onSuccess, onFailure }) => {
                 return;
             }
 
-            // Creating a new order
-            const { data } = await axios.post('/api/payment/create-order', {
-                amount: amount
-            });
+            // Get the token from localStorage
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser || !currentUser.token) {
+                alert('Please login to make a payment');
+                return;
+            }
 
+            // Verify we have the current user and token
+            console.log('Creating order with amount:', amount);
+            console.log('User token available:', !!currentUser.token);
+            
+            // Creating a new order with explicit headers
+            const { data } = await axiosInstance.post('/payment/create-order', 
+                { amount: amount },
+                { 
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            console.log('Order response:', data);
             if (!data.success) {
-                alert('Error creating order');
+                console.error('Order creation failed:', data);
+                alert('Error creating order: ' + (data.message || 'Unknown error'));
                 return;
             }
 
             // Getting the order details back
             const { order } = data;
 
+            // Get key from window.__ENV__ or env
+            const key = process.env.REACT_APP_RAZORPAY_KEY_ID;
+            
             const options = {
-                key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+                key: key,
                 amount: order.amount,
                 currency: order.currency,
                 name: "Ashrafi Graphics",
@@ -47,25 +69,32 @@ const RazorpayPayment = ({ amount, onSuccess, onFailure }) => {
                 order_id: order.id,
                 handler: async function (response) {
                     try {
-                        const { data } = await axios.post('/api/payment/verify-payment', {
+                        console.log('Payment response:', response);
+                        const { data } = await axiosInstance.post('/payment/verify-payment', {
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
                         });
 
+                        console.log('Verification response:', data);
                         if (data.success) {
                             onSuccess(response);
+                            alert('Payment successful! Thank you for your order.');
                         } else {
-                            onFailure(new Error('Payment verification failed'));
+                            console.error('Verification failed:', data);
+                            onFailure(new Error(data.message || 'Payment verification failed'));
+                            alert('Payment verification failed. Please contact support.');
                         }
                     } catch (err) {
+                        console.error('Verification error:', err);
                         onFailure(err);
+                        alert('Payment verification error. Please check your order status.');
                     }
                 },
                 prefill: {
-                    name: "",
-                    email: "",
-                    contact: ""
+                    name: currentUser.username || currentUser.name,
+                    email: currentUser.email,
+                    contact: currentUser.phone || ""
                 },
                 theme: {
                     color: "#3399cc"

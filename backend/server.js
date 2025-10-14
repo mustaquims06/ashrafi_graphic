@@ -23,6 +23,7 @@ app.use(
 );
 // ✅ Routes import
 const authRoutes = require("./routes/auth");
+const googleAuthRoutes = require("./routes/googleAuth");
 const productRoutes = require("./routes/products");
 const orderRoutes = require("./routes/orders");
 const reviewRoutes = require("./routes/reviews");
@@ -34,6 +35,7 @@ const userRoutes = require("./routes/user");
 
 
 app.use("/api/auth", authRoutes);
+app.use("/api/auth", googleAuthRoutes);  // Mount Google auth routes
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/reviews", reviewRoutes);

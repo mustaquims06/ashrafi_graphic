@@ -7,9 +7,9 @@ const axiosInstance = axios.create({
 
 // Add JWT token automatically to all requests
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  if (currentUser && currentUser.token) {
+    config.headers.Authorization = `Bearer ${currentUser.token}`;
   }
   return config;
 });

@@ -4,6 +4,48 @@ const { verifyAdmin, verifyToken } = require("../middleware/verifyToken"); // us
 const router = express.Router();
 
 /**
+ * @route GET /api/users/profile
+ * @desc  Get current user's profile
+ */
+router.get("/profile", verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error("Get profile error:", err);
+    res.status(500).json({ message: "Server error while fetching profile" });
+  }
+});
+
+/**
+ * @route PUT /api/users/profile
+ * @desc  Update user profile
+ */
+router.put("/profile", verifyToken, async (req, res) => {
+  try {
+    const { address, phone } = req.body;
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update only the provided fields
+    if (address !== undefined) user.address = address;
+    if (phone !== undefined) user.phone = phone;
+
+    await user.save();
+    res.json(user);
+  } catch (err) {
+    console.error("Update profile error:", err);
+    res.status(500).json({ message: "Server error while updating profile" });
+  }
+});
+
+/**
  * @route GET /api/users
  * @desc  Get all users (admin only)
  */
