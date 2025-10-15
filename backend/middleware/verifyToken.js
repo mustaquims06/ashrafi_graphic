@@ -115,3 +115,32 @@ const optionalVerifyToken = async (req, res, next) => {
 };
 
 module.exports = { verifyToken, verifyAdmin, verifyPurchase, optionalVerifyToken };
+
+
+/*const jwt = require("jsonwebtoken");
+const User = require("../models/User");
+
+const verifyToken = async (req, res, next) => {
+  const auth = req.headers.authorization || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+  if (!token) return res.status(401).json({ message: "No token provided" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded._id).select("_id isAdmin email");
+    if (!user) return res.status(401).json({ message: "Invalid token user" });
+    req.user = { _id: user._id, isAdmin: user.isAdmin, email: user.email };
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+};
+
+const verifyAdmin = (req, res, next) => {
+  if (!req.user?.isAdmin) {
+    return res.status(403).json({ message: "Admin access only" });
+  }
+  next();
+};
+
+module.exports = { verifyToken, verifyAdmin };*/

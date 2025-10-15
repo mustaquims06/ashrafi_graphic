@@ -7,19 +7,26 @@ const router = express.Router();
  * @route GET /api/users/profile
  * @desc  Get current user's profile
  */
-router.get("/profile", verifyToken, async (req, res) => {
+router.put("/profile", verifyToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("-password");
+    const { address, phone } = req.body;
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.json(user);
+
+    if (address !== undefined) user.address = address;
+    if (phone !== undefined) user.phone = phone;
+
+    await user.save();
+    const sanitized = user.toObject();
+    delete sanitized.password;
+    res.json(sanitized);
   } catch (err) {
-    console.error("Get profile error:", err);
-    res.status(500).json({ message: "Server error while fetching profile" });
+    console.error("Update profile error:", err);
+    res.status(500).json({ message: "Server error while updating profile" });
   }
 });
-
 /**
  * @route PUT /api/users/profile
  * @desc  Update user profile
@@ -28,17 +35,15 @@ router.put("/profile", verifyToken, async (req, res) => {
   try {
     const { address, phone } = req.body;
     const user = await User.findById(req.user._id);
-    
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Update only the provided fields
     if (address !== undefined) user.address = address;
     if (phone !== undefined) user.phone = phone;
 
     await user.save();
-    res.json(user);
+    const sanitized = user.toObject();
+    delete sanitized.password;
+    res.json(sanitized);
   } catch (err) {
     console.error("Update profile error:", err);
     res.status(500).json({ message: "Server error while updating profile" });

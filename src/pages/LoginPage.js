@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import axios from "axios";
+import api from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
@@ -11,9 +12,9 @@ export default function LoginPage() {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
-      const res = await axios.post("http://localhost:5000/api/auth/google", {
-        tokenId: credentialResponse.credential
-      });
+      const res = await api.post("/api/auth/google", {
+  tokenId: credentialResponse.credential
+});
 
       const currentUser = res.data;
       localStorage.setItem("currentUser", JSON.stringify(currentUser));
@@ -40,11 +41,7 @@ export default function LoginPage() {
 
     try {
       // ✅ Call backend login API
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
-
+    const res = await api.post("/api/auth/login", { email, password });
       // ✅ Backend returns a user object with JWT + isAdmin
       const currentUser = res.data;
 
@@ -122,7 +119,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-4">
-            <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || "556055977337-tcr70k44mtvdkv1eof029e8aobd0bteu.apps.googleusercontent.com"}>
+            <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || "1020607943747-kk8cmar0umbb22gu302vc1rmb60gh0a5.apps.googleusercontent.com"}>
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={(error) => {

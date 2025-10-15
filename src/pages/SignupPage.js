@@ -1,5 +1,6 @@
 // src/pages/SignupPage.js
 import axios from "axios";
+import api from "../api/client";
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -39,14 +40,13 @@ export default function SignupPage() {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/auth/signup-request", {
-        username,
-        email,
-        phone,
-        password,
-        address,
-      });
-
+      await api.post("/api/auth/signup-request", {
+  username,
+  email,
+  phone,
+  password,
+  address,
+});
       toast.success("✅ OTP sent to your email. Please verify.");
       setCooldown(30); // 30s cooldown
       setStep(2);
@@ -60,10 +60,7 @@ export default function SignupPage() {
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/signup-verify", {
-        email,
-        otp,
-      });
+      const res = await api.post("/api/auth/signup-verify", { email, otp });
 
       const currentUser = res.data.user;
 
@@ -82,13 +79,13 @@ export default function SignupPage() {
   // Resend OTP
   const handleResendOtp = async () => {
     try {
-      await axios.post("http://localhost:5000/api/auth/signup-request", {
-        username,
-        email,
-        phone,
-        password,
-        address,
-      });
+      await api.post("/api/auth/signup-request", {
+  username,
+  email,
+  phone,
+  password,
+  address,
+});
       toast.success("📩 New OTP sent to your email!");
       setCooldown(30);
     } catch (err) {
@@ -101,10 +98,9 @@ export default function SignupPage() {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
       const baseUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
-      const res = await axios.post(`${baseUrl}/api/auth/google`, {
-        tokenId: credentialResponse.credential
-      });
-
+      const res = await api.post("/api/auth/google", {
+  tokenId: credentialResponse.credential
+});
       const currentUser = res.data;
       localStorage.setItem("currentUser", JSON.stringify(currentUser));
       login(currentUser);
@@ -198,7 +194,7 @@ export default function SignupPage() {
                 </div>
 
                 <div className="mt-4">
-                  <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || "556055977337-tcr70k44mtvdkv1eof029e8aobd0bteu.apps.googleusercontent.com"}>
+                  <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || "1020607943747-kk8cmar0umbb22gu302vc1rmb60gh0a5.apps.googleusercontent.com"}>
                     <GoogleLogin
                       onSuccess={handleGoogleSignup}
                       onError={(error) => {

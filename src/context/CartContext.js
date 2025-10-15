@@ -3,14 +3,17 @@ import React, { createContext, useContext, useState } from "react";
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    const savedCart = localStorage.getItem('cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
 
-  // Helper to calculate discounted price
-  const calculateFinalPrice = (product) => {
+  // Helper to calculate discounted price - memoized
+  const calculateFinalPrice = React.useCallback((product) => {
     return product.offer
       ? Math.round(product.price - (product.price * parseFloat(product.offer)) / 100)
       : product.price;
-  };
+  }, []);
 
   // ➕ Add an item (or bump quantity if already in cart with same size)
   const addToCart = (product) => {
