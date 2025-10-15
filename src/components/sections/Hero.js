@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import ScrollAnimation from '../ScrollAnimation';
 import { ReactTyped } from "react-typed";
 
-const Hero = () => {
+const Hero = () => { 
   return (
     <section className="min-h-screen flex items-center justify-center gradient-bg py-16">
       <div className="container mx-auto px-4 text-center">
@@ -42,8 +42,9 @@ const Hero = () => {
         {/* Button */}
         <ScrollAnimation animation="fade-in-up" delay={0.4}>
           <div className="flex justify-center">
+            {/* 🔗 Link to Discover Projects */}
             <Link
-              to="/discover-projects"   // 🔗 yaha link change kiya
+              to="/discover-projects"
               className="bg-[#d4af37] text-white px-8 py-3 rounded-lg font-semibold shadow-md hover:bg-[#b8962e] transition-colors"
             >
               Discover Projects

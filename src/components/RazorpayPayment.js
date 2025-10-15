@@ -57,8 +57,12 @@ const RazorpayPayment = ({ amount, onSuccess, onFailure }) => {
             // Getting the order details back
             const { order } = data;
 
-            // Get key from window.__ENV__ or env
+            // Get key from env
             const key = process.env.REACT_APP_RAZORPAY_KEY_ID;
+            if (!key) {
+                alert('Missing Razorpay key. Please set REACT_APP_RAZORPAY_KEY_ID');
+                return;
+            }
             
             const options = {
                 key: key,
@@ -81,9 +85,9 @@ const RazorpayPayment = ({ amount, onSuccess, onFailure }) => {
                             onSuccess(response);
                             alert('Payment successful! Thank you for your order.');
                         } else {
-                            console.error('Verification failed:', data);
-                            onFailure(new Error(data.message || 'Payment verification failed'));
-                            alert('Payment verification failed. Please contact support.');
+                        console.error('Verification failed:', data);
+                        onFailure(new Error(data.message || 'Payment verification failed'));
+                        alert('Payment verification failed. Please contact support.');
                         }
                     } catch (err) {
                         console.error('Verification error:', err);

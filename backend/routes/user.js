@@ -1,129 +1,138 @@
-const express = require("express");
-const User = require("../models/User");
-const { verifyAdmin, verifyToken } = require("../middleware/verifyToken"); // use the same verifyToken middleware
-const router = express.Router();
+// src/pages/ProfilePage.js
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import api from "../api/client";
 
-/**
- * @route GET /api/users/profile
- * @desc  Get current user's profile
- */
-router.put("/profile", verifyToken, async (req, res) => {
-  try {
-    const { address, phone } = req.body;
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+export default function ProfilePage() {
+  const [user, setUser] = useState(null);
+  const [editing, setEditing] = useState(false);
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    if (!currentUser?.token) {
+      navigate("/login");
+      return;
     }
 
-    if (address !== undefined) user.address = address;
-    if (phone !== undefined) user.phone = phone;
+    api.get("/api/users/profile")
+      .then(({ data }) => {
+        setUser(data);
+        setAddress(data.address || "");
+        setPhone(data.phone || "");
+        localStorage.setItem("currentUser", JSON.stringify({ ...currentUser, ...data }));
+      })
+      .catch((err) => {
+        console.error("Fetch profile error:", err);
+        toast.error("Session expired. Please login again.");
+        localStorage.removeItem("currentUser");
+        navigate("/login");
+      });
+  }, [navigate]);
 
-    await user.save();
-    const sanitized = user.toObject();
-    delete sanitized.password;
-    res.json(sanitized);
-  } catch (err) {
-    console.error("Update profile error:", err);
-    res.status(500).json({ message: "Server error while updating profile" });
-  }
-});
-/**
- * @route PUT /api/users/profile
- * @desc  Update user profile
- */
-router.put("/profile", verifyToken, async (req, res) => {
-  try {
-    const { address, phone } = req.body;
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    if (address !== undefined) user.address = address;
-    if (phone !== undefined) user.phone = phone;
-
-    await user.save();
-    const sanitized = user.toObject();
-    delete sanitized.password;
-    res.json(sanitized);
-  } catch (err) {
-    console.error("Update profile error:", err);
-    res.status(500).json({ message: "Server error while updating profile" });
-  }
-});
-
-/**
- * @route GET /api/users
- * @desc  Get all users (admin only)
- */
-router.get("/", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const users = await User.find().select("-password");
-    res.json(users);
-  } catch (err) {
-    console.error("Get users error:", err);
-    res.status(500).json({ message: "Server error while fetching users" });
-  }
-});
-
-/**
- * @route GET /api/users/:id
- * @desc  Get a single user by ID (admin or self)
- */
-router.get("/:id", verifyToken, async (req, res) => {
-  try {
-    if (req.user._id.toString() !== req.params.id && !req.user.isAdmin) {
-      return res.status(403).json({ message: "Not authorized" });
+  const handleSave = async () => {
+    try {
+      const { data } = await api.put("/api/users/profile", { address, phone });
+      setUser(data);
+      const curr = JSON.parse(localStorage.getItem("currentUser")) || {};
+      localStorage.setItem("currentUser", JSON.stringify({ ...curr, ...data }));
+      setEditing(false);
+      toast.success("✅ Profile updated successfully!");
+    } catch (err) {
+      console.error("Update profile error:", err);
+      toast.error(err.response?.data?.message || "Failed to update profile");
     }
+  };
 
-    const user = await User.findById(req.params.id).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found" });
+  const handleLogout = () => {
+    localStorage.removeItem("currentUser");
+    toast.success("👋 Logged out successfully!");
+    navigate("/login");
+  };
 
-    res.json(user);
-  } catch (err) {
-    console.error("Get user error:", err);
-    res.status(500).json({ message: "Server error while fetching user" });
-  }
-});
+  if (!user) return null;
 
-/**
- * @route PUT /api/users/:id
- * @desc  Update user details (self or admin)
- */
-router.put("/:id", verifyToken, async (req, res) => {
-  try {
-    if (req.user._id.toString() !== req.params.id && !req.user.isAdmin) {
-      return res.status(403).json({ message: "Not authorized to update this user" });
-    }
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-yellow-50 via-white to-yellow-100 dark:from-gray-800 dark:via-gray-900 dark:to-black px-4 py-10">
+      <div className="max-w-3xl w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-[var(--primary)] text-white text-center py-10 relative">
+          <div className="absolute top-5 right-5">
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 hover:bg-red-600 transition px-4 py-2 rounded-md font-medium text-sm"
+            >
+              🚪 Logout
+            </button>
+          </div>
+          <div className="mx-auto w-24 h-24 rounded-full flex items-center justify-center text-4xl font-bold bg-white text-[var(--primary)] shadow-lg">
+            {(user.username || user.name || "").charAt(0).toUpperCase()}
+          </div>
+          <h2 className="mt-4 font-bold text-2xl">
+            {user.username || user.name}
+          </h2>
+          <p className="text-sm opacity-90">{user.email}</p>
+        </div>
 
-    const { username, email, phone } = req.body;
-    const updated = await User.findByIdAndUpdate(
-      req.params.id,
-      { username, email, phone },
-      { new: true, runValidators: true }
-    ).select("-password");
+        <div className="p-8 space-y-6">
+          <h3 className="text-xl font-bold text-yellow-600 dark:text-yellow-400 border-b pb-2">
+            Profile Information
+          </h3>
 
-    if (!updated) return res.status(404).json({ message: "User not found" });
+          {!editing ? (
+            <div className="space-y-3 text-gray-700 dark:text-gray-200">
+              <p><strong>Full Name:</strong> {user.username || user.name}</p>
+              <p><strong>Email:</strong> {user.email}</p>
+              <p><strong>Phone:</strong> {user.phone || "Not added"}</p>
+              <p><strong>Address:</strong> {user.address || "Not added"}</p>
 
-    res.json(updated);
-  } catch (err) {
-    console.error("Update user error:", err);
-    res.status(500).json({ message: "Server error while updating user" });
-  }
-});
-
-/**
- * @route DELETE /api/users/:id
- * @desc  Delete a user (admin only)
- */
-router.delete("/:id", verifyToken, verifyAdmin, async (req, res) => {
-  try {
-    const deleted = await User.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: "User not found" });
-
-    res.json({ message: "User deleted successfully" });
-  } catch (err) {
-    console.error("Delete user error:", err);
-    res.status(500).json({ message: "Server error while deleting user" });
-  }
-});
-
-module.exports = router;
+              <button
+                onClick={() => setEditing(true)}
+                className="mt-6 w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2.5 rounded-md transition-all shadow"
+              >
+                ✏️ Edit Profile
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <div>
+                <label className="block font-medium mb-1">📞 Phone Number</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full border border-yellow-300 focus:ring-2 focus:ring-yellow-400 rounded-md px-3 py-2 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block font-medium mb-1">🏠 Address</label>
+                <textarea
+                  rows="3"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="w-full border border-yellow-300 focus:ring-2 focus:ring-yellow-400 rounded-md px-3 py-2 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={handleSave}
+                  className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-md transition"
+                >
+                  💾 Save
+                </button>
+                <button
+                  onClick={() => setEditing(false)}
+                  className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-md transition"
+                >
+                  ✖ Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

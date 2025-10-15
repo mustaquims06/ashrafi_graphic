@@ -19,18 +19,19 @@ export default function ProfilePage() {
     }
 
     api.get("/api/users/profile")
-      .then(({ data }) => {
-        setUser(data);
-        setAddress(data.address || "");
-        setPhone(data.phone || "");
-        localStorage.setItem("currentUser", JSON.stringify({ ...currentUser, ...data }));
-      })
-      .catch((err) => {
-        console.error("Fetch profile error:", err);
-        toast.error("Session expired. Please login again.");
-        localStorage.removeItem("currentUser");
-        navigate("/login");
-      });
+  .then(({ data }) => {
+    setUser(data);
+    setAddress(data.address || "");
+    setPhone(data.phone || "");
+    const curr = JSON.parse(localStorage.getItem("currentUser")) || {};
+    localStorage.setItem("currentUser", JSON.stringify({ ...curr, ...data })); // token preserve
+  })
+  .catch((err) => {
+    console.log("Profile error:", err.response?.status, err.response?.data);
+    toast.error(err.response?.data?.message || "Session expired. Please login again.");
+    localStorage.removeItem("currentUser");
+    navigate("/login");
+  });
   }, [navigate]);
 
   const handleSave = async () => {

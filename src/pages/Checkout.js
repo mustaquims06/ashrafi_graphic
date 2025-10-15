@@ -10,7 +10,6 @@ const Checkout = () => {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [user, setUser] = useState(null);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -85,23 +84,14 @@ const Checkout = () => {
         throw new Error(`Backend error: ${res.status} - ${errorText}`);
       }
 
-      const orderData = await res.json();
-      
-      // Show success popup
-      setShowSuccessModal(true);
-      
-      // Clear cart and update storage
-      clearCart();
-      localStorage.removeItem('cart');
+      await res.json();
+toast.success("✅ Order placed successfully! Redirecting...");
 
-      // Show success toast
-      toast.success("✅ Order placed successfully!");
-      
-      // Redirect after modal is closed
-      setTimeout(() => {
-        setShowSuccessModal(false);
-        navigate("/productlist");
-      }, 3000);
+    // 🕒 Redirect after 5 seconds
+    setTimeout(() => {
+      clearCart();
+      navigate("/productlist");
+    }, 5000);
     } catch (err) {
       console.warn("⚠️ Order failed:", err.message);
 
@@ -230,26 +220,6 @@ const Checkout = () => {
             </button>
           )}
         </div>
-
-        {/* Success Modal */}
-        {showSuccessModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-            <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4 transform animate-fadeIn">
-              <div className="text-center">
-                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                  <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-2">Order Placed Successfully!</h3>
-                <p className="text-sm text-gray-500 mb-4">
-                  Thank you for your order. You will be redirected to the products page shortly.
-                </p>
-                <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
