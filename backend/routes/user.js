@@ -35,7 +35,9 @@ router.put("/profile", verifyToken, async (req, res) => {
   try {
     const { address, phone } = req.body;
     const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     if (address !== undefined) user.address = address;
     if (phone !== undefined) user.phone = phone;
@@ -49,7 +51,6 @@ router.put("/profile", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Server error while updating profile" });
   }
 });
-
 /**
  * @route GET /api/users
  * @desc  Get all users (admin only)

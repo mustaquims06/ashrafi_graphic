@@ -23,27 +23,38 @@ const Checkout = () => {
     setAddress(currentUser.address || "");
   }, [navigate]);
 
-  // ✅ Use finalPrice if available, else fallback to price
   const total = cart.reduce(
     (sum, item) =>
       sum + (item.finalPrice || item.price) * (item.quantity || 1),
     0
   );
 
+  // NEW: validators
+  const isPhoneValid = /^[6-9]\d{9}$/.test(phone.trim());
+  const isAddressValid = address.trim().length >= 10;
+  const isFormValid = Boolean(paymentMethod && isPhoneValid && isAddressValid);
+
   const handlePlaceOrder = async () => {
-    if (!paymentMethod || !phone || !address) {
-      toast.error("⚠️ Please fill all details (phone, address, payment method)");
+    // NEW: strict checks
+    if (!paymentMethod) {
+      toast.error("Please select a payment method");
+      return;
+    }
+    if (!isPhoneValid) {
+      toast.error("Please enter a valid 10-digit phone number");
+      return;
+    }
+    if (!isAddressValid) {
+      toast.error("Please enter a complete address (min 10 characters)");
       return;
     }
 
-    // Update profile locally
-    const updatedUser = { ...user, phone, address };
+    const updatedUser = { ...user, phone: phone.trim(), address: address.trim() };
     let users = JSON.parse(localStorage.getItem("users")) || [];
     users = users.map((u) => (u.email === user.email ? updatedUser : u));
     localStorage.setItem("users", JSON.stringify(users));
     localStorage.setItem("currentUser", JSON.stringify(updatedUser));
 
-    // Prepare order payload
     const items = cart.map((i) => ({
       productId: i._id || i.id,
       name: i.name,
@@ -57,8 +68,8 @@ const Checkout = () => {
       userEmail: user.email,
       items,
       total,
-      phone,
-      address,
+      phone: phone.trim(),
+      address: address.trim(),
       paymentMethod,
       date: new Date().toISOString(),
     };
@@ -85,19 +96,15 @@ const Checkout = () => {
       }
 
       await res.json();
-toast.success("✅ Order placed successfully! Redirecting...");
+      toast.success("✅ Order placed successfully! Redirecting...");
 
-    // 🕒 Redirect after 5 seconds
-    setTimeout(() => {
-      clearCart();
-      navigate("/productlist");
-    }, 5000);
-      navigate("/productlist");
-    }, 5000);
+      setTimeout(() => {
+        clearCart();
+        navigate("/productlist");
+      }, 5000);
     } catch (err) {
       console.warn("⚠️ Order failed:", err.message);
 
-      // Fallback local save
       const offlineOrders =
         JSON.parse(localStorage.getItem("offlineOrders")) || [];
       offlineOrders.push(newOrder);
@@ -156,19 +163,33 @@ toast.success("✅ Order placed successfully! Redirecting...");
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-2">Delivery Details</h3>
           <input
-            type="text"
+            type="tel"
             placeholder="Phone Number"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full border px-3 py-2 rounded mb-3"
+            className={`w-full border px-3 py-2 rounded mb-3 ${phone && !isPhoneValid ? 'border-red-500' : ''}`}
+            // HTML hints (won't enforce without form submit, but helps mobile keyboards)
+            inputMode="numeric"
+            pattern="[6-9]\d{9}"
+            maxLength={10}
+            required
           />
           <textarea
             placeholder="Delivery Address"
             rows="3"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
+            className={`w-full border px-3 py-2 rounded ${address && !isAddressValid ? 'border-red-500' : ''}`}
+            minLength={10}
+            required
           />
+          {/* Optional inline hints */}
+          {!isPhoneValid && phone && (
+            <p className="text-sm text-red-600 mt-1">Enter a valid 10-digit phone (starts with 6-9).</p>
+          )}
+          {!isAddressValid && address && (
+            <p className="text-sm text-red-600 mt-1">Address should be at least 10 characters.</p>
+          )}
         </div>
 
         {/* Payment */}
@@ -202,21 +223,31 @@ toast.success("✅ Order placed successfully! Redirecting...");
 
         <div>
           {paymentMethod === "Razorpay" ? (
-            <RazorpayPayment
-              amount={total}
-              onSuccess={(response) => {
-                toast.success("Payment successful!");
-                handlePlaceOrder();
-              }}
-              onFailure={(error) => {
-                toast.error("Payment failed. Please try again.");
-                console.error("Payment failed:", error);
-              }}
-            />
+            isFormValid ? (
+              <RazorpayPayment
+                amount={total}
+                onSuccess={(response) => {
+                  toast.success("Payment successful!");
+                  handlePlaceOrder();
+                }}
+                onFailure={(error) => {
+                  toast.error("Payment failed. Please try again.");
+                  console.error("Payment failed:", error);
+                }}
+              />
+            ) : (
+              <button
+                disabled
+                className="w-full bg-gray-300 text-gray-600 py-3 rounded-lg cursor-not-allowed"
+              >
+                Fill phone & address to continue
+              </button>
+            )
           ) : (
             <button
               onClick={handlePlaceOrder}
-              className="w-full bg-[var(--primary)] text-white py-3 rounded-lg hover:opacity-90 transition"
+              disabled={!isFormValid}
+              className={`w-full bg-[var(--primary)] text-white py-3 rounded-lg transition ${!isFormValid ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-90'}`}
             >
               Place Order
             </button>

@@ -1,3 +1,5 @@
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
@@ -7,7 +9,7 @@ const nodemailer = require("nodemailer");
 const User = require("../models/User");
 const TempUser = require("../models/TempUser");
 const Otp = require("../models/Otp");
-const { verifyAdmin } = require("../middleware/authMiddleware");
+const { verifyAdmin, verifyToken } = require("../middleware/verifyToken");
 
 // Utility: create JWT
 const generateToken = (user) => {
@@ -171,8 +173,50 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.post("/google", async (req, res) => {
+  try {
+    const { tokenId } = req.body;
+    if (!tokenId) return res.status(400).json({ message: "Token missing" });
+
+    const ticket = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({
+        username: name || email.split("@")[0],
+        email,
+        googleId,
+        profileImage: picture,
+        isVerified: true,
+      });
+    } else if (!user.googleId) {
+      user.googleId = googleId;
+      await user.save();
+    }
+
+    const token = generateToken(user);
+    res.json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+      isAdmin: user.isAdmin,
+      token,
+    });
+  } catch (err) {
+    console.error("Google login error:", err);
+    res.status(400).json({ message: "Invalid Google token" });
+  }
+});
+
 // ✅ Get all users (admin only)
-router.get("/users", verifyAdmin, async (req, res) => {
+router.get("/users", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const users = await User.find().select("-password");
     res.json({ users });
