@@ -92,6 +92,8 @@ toast.success("✅ Order placed successfully! Redirecting...");
       clearCart();
       navigate("/productlist");
     }, 5000);
+      navigate("/productlist");
+    }, 5000);
     } catch (err) {
       console.warn("⚠️ Order failed:", err.message);
 

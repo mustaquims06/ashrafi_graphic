@@ -7,10 +7,7 @@ const nodemailer = require("nodemailer");
 const User = require("../models/User");
 const TempUser = require("../models/TempUser");
 const Otp = require("../models/Otp");
-/*const { verifyAdmin } = require("../middleware/authMiddleware");*/
-const { verifyAdmin, verifyToken } = require("../middleware/verifyToken");
-const { OAuth2Client } = require("google-auth-library");
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const { verifyAdmin } = require("../middleware/authMiddleware");
 
 // Utility: create JWT
 const generateToken = (user) => {
@@ -175,7 +172,7 @@ router.post("/login", async (req, res) => {
 });
 
 // ✅ Get all users (admin only)
-router.get("/users", verifyToken, verifyAdmin, async (req, res) => {
+router.get("/users", verifyAdmin, async (req, res) => {
   try {
     const users = await User.find().select("-password");
     res.json({ users });
@@ -184,6 +181,7 @@ router.get("/users", verifyToken, verifyAdmin, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 // ✅ Reset Password (after OTP verified)
 router.post("/reset-password", async (req, res) => {
   try {
@@ -217,73 +215,4 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
-// inside routes/auth.js
-router.post("/google", async (req, res) => {
-  try {
-    const { tokenId } = req.body;
-    if (!tokenId) return res.status(400).json({ message: "Token missing" });
-
-    // Debug: token payload headers
-    const parts = tokenId.split(".");
-    if (parts.length !== 3) {
-      return res.status(400).json({ message: "Invalid token format" });
-    }
-    const decoded = JSON.parse(Buffer.from(parts[1], "base64").toString());
-    console.log("Token aud:", decoded.aud);
-    console.log("Backend expects:", process.env.GOOGLE_CLIENT_ID);
-
-    let ticket;
-    try {
-      ticket = await client.verifyIdToken({
-        idToken: tokenId,
-        audience: process.env.GOOGLE_CLIENT_ID,
-      });
-    } catch (e) {
-      console.error("verifyIdToken failed:", e.message);
-      return res.status(400).json({ message: `verifyIdToken failed: ${e.message}` });
-    }
-
-    const payload = ticket.getPayload();
-    if (!payload) {
-      return res.status(400).json({ message: "No payload in Google token" });
-    }
-
-    const { sub: googleId, email, name, picture, email_verified, iss } = payload;
-    // Optional sanity checks
-    if (!["accounts.google.com", "https://accounts.google.com"].includes(iss)) {
-      return res.status(400).json({ message: `Invalid issuer: ${iss}` });
-    }
-    if (!email) {
-      return res.status(400).json({ message: "Email not present in Google token" });
-    }
-
-    let user = await User.findOne({ email });
-    if (!user) {
-      user = await User.create({
-        username: name || email.split("@")[0],
-        email,
-        googleId,
-        profileImage: picture,
-        isVerified: !!email_verified,
-      });
-    } else if (!user.googleId) {
-      user.googleId = googleId;
-      await user.save();
-    }
-
-    const token = generateToken(user);
-    return res.json({
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      phone: user.phone,
-      address: user.address,
-      isAdmin: user.isAdmin,
-      token,
-    });
-  } catch (err) {
-    console.error("Google login error:", err);
-    return res.status(400).json({ message: err.message || "Invalid Google token" });
-  }
-});
 module.exports = router;

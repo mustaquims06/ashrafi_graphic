@@ -5,15 +5,15 @@ import { motion } from "framer-motion";
 import { useCart } from "../context/CartContext";
 import "../styles/index.css";
 
-const ProductCard = React.memo(({ product }) => {
+const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  const handleOrderNow = React.useCallback((e) => {
+  const handleOrderNow = (e) => {
     e.preventDefault(); // prevent card link trigger
     addToCart({ ...product, selectedSize: product.defaultSize });
     navigate("/cart");
-  }, [product, addToCart, navigate]);
+  };
 
   const imgUrl = product.images?.[0]?.url || product.image || "/placeholder.png";
 
@@ -73,10 +73,6 @@ const ProductCard = React.memo(({ product }) => {
       </Link>
     </motion.div>
   );
-}, (prevProps, nextProps) => {
-  return prevProps.product.id === nextProps.product.id &&
-         prevProps.product.price === nextProps.product.price &&
-         prevProps.product.offer === nextProps.product.offer;
-});
+};
 
 export default ProductCard;

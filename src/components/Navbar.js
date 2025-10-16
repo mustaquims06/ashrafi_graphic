@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logo from "../assets/logo.png"; // ✅ fixed path
 
-const Navbar = React.memo(() => {
+const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
-  const isActive = React.useCallback((path) => location.pathname === path, [location.pathname]);
+  const isActive = (path) => location.pathname === path;
 
   const navItems = [
     { name: 'Home', path: '/' },
@@ -97,6 +97,6 @@ const Navbar = React.memo(() => {
       </div>
     </nav>
   );
-});
+};
 
 export default Navbar;
