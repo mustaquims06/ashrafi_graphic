@@ -1,0 +1,110 @@
+[{
+  "_id": {
+    "$oid": "68dd55cd2170d5c6fe2b0c7f"
+  },
+  "name": "Premium Ashrafi Islamic Cap - Black with Golden Embroidery",
+  "description": "This is an elegant Ashrafi Islamic cap, designed with a blend of tradition and style. Made from premium black fabric, it features a sleek look enhanced by fine golden embroidery.",
+  "price": 280,
+  "images": [
+    {
+      "url": "https://res.cloudinary.com/dkephs2hv/image/upload/v1759340230/products/ta6rjoigpjklp1zmopks.png",
+      "public_id": "products/ta6rjoigpjklp1zmopks",
+      "_id": {
+        "$oid": "68dd66c991833a0299b260d9"
+      }
+    },
+    {
+      "url": "https://res.cloudinary.com/dkephs2hv/image/upload/v1759340229/products/meuh6e5iz1qurhkbsvh5.png",
+      "public_id": "products/meuh6e5iz1qurhkbsvh5",
+      "_id": {
+        "$oid": "68dd66c991833a0299b260da"
+      }
+    },
+    {
+      "url": "https://res.cloudinary.com/dkephs2hv/image/upload/v1759340232/products/nqbafgnajvn31x4pnaxa.png",
+      "public_id": "products/nqbafgnajvn31x4pnaxa",
+      "_id": {
+        "$oid": "68dd66c991833a0299b260db"
+      }
+    },
+    {
+      "url": "https://res.cloudinary.com/dkephs2hv/image/upload/v1759340232/products/koybggknjbcu2owkjdd6.png",
+      "public_id": "products/koybggknjbcu2owkjdd6",
+      "_id": {
+        "$oid": "68dd66c991833a0299b260dc"
+      }
+    }
+  ],
+  "video": "",
+  "sizes": [
+    "20.5 cm",
+    "21 cm",
+    "21.5 cm",
+    "22 cm",
+    "22.5 cm",
+    "23 cm"
+  ],
+  "offer": "",
+  "inStock": true,
+  "createdAt": {
+    "$date": "2025-10-01T16:24:45.625Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-01T17:38:41.008Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68dd676591833a0299b26115"
+  },
+  "name": "Classic Ashrafi Islamic Cap - Traditional Black Design",
+  "description": "This is an elegant Ashrafi Islamic cap, designed with a blend of tradition and style. Made from premium black fabric, it features a sleek look enhanced by fine golden embroidery.",
+  "price": 280,
+  "sizes": [
+    "20.5 cm",
+    "21 cm",
+    "21.5 cm",
+    "22 cm",
+    "22.5 cm",
+    "23 cm"
+  ],
+  "images": [
+    {
+      "url": "https://res.cloudinary.com/dkephs2hv/image/upload/v1759340387/products/mzbtjubggmwubsqiv5ph.png",
+      "public_id": "products/mzbtjubggmwubsqiv5ph",
+      "_id": {
+        "$oid": "68dd676591833a0299b26116"
+      }
+    },
+    {
+      "url": "https://res.cloudinary.com/dkephs2hv/image/upload/v1759340387/products/sqawth1bdevf2uzgf6ma.png",
+      "public_id": "products/sqawth1bdevf2uzgf6ma",
+      "_id": {
+        "$oid": "68dd676591833a0299b26117"
+      }
+    },
+    {
+      "url": "https://res.cloudinary.com/dkephs2hv/image/upload/v1759340388/products/rnhdpizb5rpyvvl4aau6.png",
+      "public_id": "products/rnhdpizb5rpyvvl4aau6",
+      "_id": {
+        "$oid": "68dd676591833a0299b26118"
+      }
+    },
+    {
+      "url": "https://res.cloudinary.com/dkephs2hv/image/upload/v1759340387/products/rqhbodbevhxgl40vjzan.png",
+      "public_id": "products/rqhbodbevhxgl40vjzan",
+      "_id": {
+        "$oid": "68dd676591833a0299b26119"
+      }
+    }
+  ],
+  "offer": "",
+  "createdAt": {
+    "$date": "2025-10-01T17:39:49.065Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-01T17:39:49.065Z"
+  },
+  "__v": 0
+}]
