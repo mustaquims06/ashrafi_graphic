@@ -15,6 +15,7 @@ import spotifyLogo from "../assets/logos/spotify.png";
 import youtubeLogo from "../assets/logos/youtube.png"
 import tidalLogo from "../assets/logos/tidal.png"
 
+<<<<<<< HEAD
 // Import service images
 import posterImage from "../assets/discover/poster1.jpg";
 import thumbnailImage from "../assets/discover/thumbnail1.jpg";
@@ -26,6 +27,8 @@ import musicPromoImage from "../assets/discover/poster4.png";
 import musicDistributionImage from "../assets/discover/thumbnail3.png";
 import musicPlatformImage from "../assets/discover/thumbnail4.jpg";
 
+=======
+>>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
 
 /* --- Service Popup Modal --- */
 function ServicePopup({ service, onClose }) {
@@ -190,17 +193,29 @@ const services = [
       {
         title: "Poster Design",
         description: "Eye-catching posters tailored to your theme.",
+<<<<<<< HEAD
         image: posterImage,
+=======
+        image: "https://img.freepik.com/free-vector/hand-drawn-graphic-designer-poster_23-2150428116.jpg?semt=ais_incoming&w=740&q=80",
+>>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       },
       {
         title: "Thumbnail Design",
         description: "Clickable thumbnails that grab instant attention.",
+<<<<<<< HEAD
         image: thumbnailImage,
+=======
+        image: "https://img.freepik.com/premium-psd/we-provide-graphic-design-services-youtube-thumbnail-design_113934-87.jpg",
+>>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       },
       {
         title: "Logo Design",
         description: "Professional and modern logo concepts.",
+<<<<<<< HEAD
         image: logoImage,
+=======
+        image: "https://images.unsplash.com/photo-1589571894960-20bbe2828d0a?w=600",
+>>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       },
     ],
   },
@@ -213,17 +228,29 @@ const services = [
       {
         title: "AI Editing",
         description: "Smart automated edits with precision.",
+<<<<<<< HEAD
         image: aiEditingImage,
+=======
+        image: "https://static-cse.canva.com/blob/2155379/feature_tools-feature_ai-photo-editing_how-to.jpg",
+>>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       },
       {
         title: "Short Editing",
         description: "Quick edits for Reels, Shorts, and TikToks.",
+<<<<<<< HEAD
         image: shortVideoImage,
+=======
+        image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600",
+>>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       },
       {
         title: "Marketing Video",
         description: "High-conversion promo and ad videos.",
+<<<<<<< HEAD
         image: marketingVideoImage,
+=======
+        image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600",
+>>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       },
     ],
   },
@@ -236,27 +263,47 @@ const services = [
       {
         title: "Music Promotion",
         description: "Work with our team to promote your releases and reach new fans.",
+<<<<<<< HEAD
         image: musicPromoImage,
+=======
+        image: "https://promosoundgroup.net/wp-content/uploads/2024/04/Buy-Music-Promotion.webp",
+>>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       },
       {
         title: "Pre-Save-Links",
         description: "Promote your music with Pre-Save SmartLinks one place for all your important links.",
+<<<<<<< HEAD
         image: musicDistributionImage,
+=======
+        image: "https://cdn.prod.website-files.com/655e0fa544c67c1ee5ce01c7/663e40ba3b84dc5172279684_pre-save-links-og.webp",
+>>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       },
       {
         title: "Top Tracks & Artists",
         description: "Upload your music for a chance to be featured to thousands of followers worldwide.",
+<<<<<<< HEAD
         image: musicPlatformImage,
+=======
+        image: "https://preview.redd.it/my-top-tracks-and-artists-from-the-last-6-months-and-4-weeks-v0-q0uizi4cejne1.png?width=1248&format=png&auto=webp&s=a31bdb34522536ac64351a75a28dfd70d67bb3b6",
+>>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       },
       {
         title: "YouTube Content ID",
         description: "Content ID is YouTube's digital fingerprint system that identifies and tracks uploaded content.",
+<<<<<<< HEAD
         image: musicPromoImage,
+=======
+        image: "https://blog.hoopr.ai/wp-content/uploads/2025/07/67053c76ac321a53efe6adda_YouTube-Content-ID.png",
+>>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       },
       {
         title: "Rights Manager",
         description: "Protects, monetizes, and controls your content by managing claims, takedowns, and monetization.",
+<<<<<<< HEAD
         image: musicDistributionImage,
+=======
+        image: "https://tiempodenegocios.com/wp-content/uploads/2017/05/facebook-rights-manager.jpg",
+>>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       },
     ],
   },
