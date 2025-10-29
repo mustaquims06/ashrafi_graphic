@@ -6,7 +6,6 @@ import { ReactTyped } from "react-typed";
 
 const Hero = () => { 
   return (
-<<<<<<< HEAD
     <section 
       className="min-h-screen flex items-center justify-center py-16 relative"
       style={{
@@ -23,14 +22,6 @@ const Hero = () => {
         {/* Heading with typing effect */}
         <ScrollAnimation animation="fade-in-up">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
-=======
-    <section className="min-h-screen flex items-center justify-center gradient-bg py-16">
-      <div className="container mx-auto px-4 text-center">
-
-        {/* Heading with typing effect */}
-        <ScrollAnimation animation="fade-in-up">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
             <ReactTyped
               strings={["Ashrafi <span class='gold-text'>Graphic</span>"]}
               typeSpeed={70}
@@ -44,11 +35,7 @@ const Hero = () => {
 
         {/* Tagline with typing loop */}
         <ScrollAnimation animation="fade-in-up" delay={0.2}>
-<<<<<<< HEAD
           <p className="text-xl md:text-2xl text-white mb-10 max-w-3xl mx-auto">
-=======
-          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-10 max-w-3xl mx-auto">
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
             <ReactTyped
               strings={[
                 "Creativity, Culture & Connection",

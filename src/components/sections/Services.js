@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import ScrollAnimation from "../ScrollAnimation";
 
-<<<<<<< HEAD
 // Import service images
 import posterImage from "../../assets/discover/poster1.jpg";
 import thumbnailImage from "../../assets/discover/thumbnail1.jpg";
@@ -14,8 +13,6 @@ import musicPromoImage from "../../assets/discover/poster4.png";
 import musicDistributionImage from "../../assets/discover/thumbnail3.png";
 import musicPlatformImage from "../../assets/discover/thumbnail4.jpg";
 
-=======
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
 const Services = () => {
   const [activeService, setActiveService] = useState(null);
 
@@ -29,37 +26,25 @@ const Services = () => {
       description:
         "Creative visuals that bring your ideas to life and make your brand stand out.",
       icon: "🎨",
-<<<<<<< HEAD
       image: posterImage,
-=======
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       subServices: [
         {
           name: "Poster Design",
           desc: "Eye-catching posters tailored for events and campaigns.",
           icon: "🖼️",
-<<<<<<< HEAD
           image: posterImage,
-=======
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
         },
         {
           name: "Thumbnail Design",
           desc: "Professional thumbnails that boost engagement.",
           icon: "📸",
-<<<<<<< HEAD
           image: thumbnailImage,
-=======
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
         },
         {
           name: "Logo Design",
           desc: "Memorable logos that define your brand identity.",
           icon: "⚜️",
-<<<<<<< HEAD
           image: logoImage,
-=======
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
         },
       ],
     },
@@ -68,37 +53,25 @@ const Services = () => {
       description:
         "Professional editing solutions that turn raw footage into engaging videos.",
       icon: "🎬",
-<<<<<<< HEAD
       image: aiEditingImage,
-=======
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       subServices: [
         {
           name: "AI Editing",
           desc: "Fast AI-driven edits for quick delivery.",
           icon: "🤖",
-<<<<<<< HEAD
           image: aiEditingImage,
-=======
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
         },
         {
           name: "Short Video Editing",
           desc: "Dynamic edits for Reels, Shorts, and TikToks.",
           icon: "🎞️",
-<<<<<<< HEAD
           image: shortVideoImage,
-=======
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
         },
         {
           name: "Marketing Videos",
           desc: "Compelling ads and promos for your business.",
           icon: "📢",
-<<<<<<< HEAD
           image: marketingVideoImage,
-=======
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
         },
       ],
     },
@@ -107,37 +80,25 @@ const Services = () => {
       description:
         "Seamless digital distribution services to launch your music worldwide.",
       icon: "🎵",
-<<<<<<< HEAD
       image: musicPromoImage,
-=======
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
       subServices: [
         {
           name: "Global Release",
           desc: "Distribute across Spotify, Apple Music, and more.",
           icon: "🌍",
-<<<<<<< HEAD
           image: musicDistributionImage,
-=======
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
         },
         {
           name: "Royalty Management",
           desc: "Track and manage your earnings transparently.",
           icon: "💰",
-<<<<<<< HEAD
           image: musicPlatformImage,
-=======
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
         },
         {
           name: "Artist Promotion",
           desc: "Boost reach with tailored promotional strategies.",
           icon: "🚀",
-<<<<<<< HEAD
           image: musicPromoImage,
-=======
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
         },
       ],
     },
@@ -205,7 +166,6 @@ const Services = () => {
                                 group hover:bg-[var(--primary)]"
                     >
                       <div className="flex items-center space-x-3">
-<<<<<<< HEAD
                         <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
                           <img 
                             src={sub.image} 
@@ -214,12 +174,6 @@ const Services = () => {
                           />
                         </div>
                         <div className="flex-1">
-=======
-                        <span className="text-2xl transition-colors duration-500 ease-in-out group-hover:text-white">
-                          {sub.icon}
-                        </span>
-                        <div>
->>>>>>> 13aa030d6766559ab3903a74de99062b8c572b7f
                           <h4 className="font-semibold text-[var(--text-color)] transition-colors duration-500 ease-in-out group-hover:text-white">
                             {sub.name}
                           </h4>
