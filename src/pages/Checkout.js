@@ -78,7 +78,7 @@ const Checkout = () => {
       const token = updatedUser.token;
       if (!token) throw new Error("No token found");
 
-      const res = await fetch('/api/orders',
+      const res = await fetch('https://ashrafigraphic.com/api/orders',
         {
           method: "POST",
           headers: {

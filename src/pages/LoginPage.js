@@ -12,7 +12,7 @@ export default function LoginPage() {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
-      const res = await api.post("/api/auth/google", {
+      const res = await api.post("https://ashrafigraphic.com/api/auth/google", {
           tokenId: credentialResponse.credential
         });
       const currentUser = res.data;
@@ -40,7 +40,7 @@ export default function LoginPage() {
 
     try {
       // ✅ Call backend login API
-      const res = await api.post("/api/auth/login", { email, password });
+      const res = await api.post("https://ashrafigraphic.com/api/auth/login", { email, password });
 
       // ✅ Backend returns a user object with JWT + isAdmin
       const currentUser = res.data;

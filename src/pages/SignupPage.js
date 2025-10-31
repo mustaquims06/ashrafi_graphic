@@ -40,7 +40,7 @@ export default function SignupPage() {
     }
 
     try {
-      await api.post("/api/auth/signup-request", {
+      await api.post("https://ashrafigraphic.com/api/auth/signup-request", {
           username,
           email,
           phone,
@@ -61,7 +61,7 @@ export default function SignupPage() {
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post("/api/auth/signup-verify", { email, otp });
+      const res = await api.post("https://ashrafigraphic.com/api/auth/signup-verify", { email, otp });
 
       const currentUser = res.data.user;
 
@@ -80,7 +80,7 @@ export default function SignupPage() {
   // Resend OTP
   const handleResendOtp = async () => {
     try {
-      await api.post("/api/auth/signup-request", {
+      await api.post("https://ashrafigraphic.com/api/auth/signup-request", {
   username,
   email,
   phone,
@@ -99,7 +99,7 @@ export default function SignupPage() {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
       const baseUrl = process.env.REACT_APP_API_URL || "https://ashrafigraphic.com";
-      const res = await api.post("/api/auth/google", {
+      const res = await api.post("https://ashrafigraphic.com/api/auth/google", {
   tokenId: credentialResponse.credential
 });
 

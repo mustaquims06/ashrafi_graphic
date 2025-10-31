@@ -18,7 +18,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState("");
 
-  const API_URL = process.env.REACT_APP_API_URL || "'/api/products'";
+  const API_URL = process.env.REACT_APP_API_URL || "'https://ashrafigraphic.com/api/products'";
 
   useEffect(() => {
     const fetchProduct = async () => {

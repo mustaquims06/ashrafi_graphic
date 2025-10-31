@@ -21,7 +21,7 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false); // ✅ for mobile
 
   const navigate = useNavigate();
-  const API_URL = process.env.REACT_APP_API_URL || "/api";
+  const API_URL = process.env.REACT_APP_API_URL || "https://ashrafigraphic.com/api";
 
   const allSizes = ["20.5 cm", "21 cm", "21.5 cm", "22 cm", "22.5 cm", "23 cm"];
 
