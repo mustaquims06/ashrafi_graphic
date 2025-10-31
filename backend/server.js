@@ -17,8 +17,13 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 // ✅ CORS
 app.use(
   cors({
-    origin: ['https://ashrafigraphic.com'],
+    origin: [ 'https://ashrafigraphic.com',      // ✅ Your domain
+    'http://ashrafigraphic.com',       // ✅ HTTP version
+    'https://www.ashrafigraphic.com',  // ✅ WWW version
+    'http://www.ashrafigraphic.com', ],  // ✅ WWW HTTP version
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   })
 );
 // ✅ Routes import
