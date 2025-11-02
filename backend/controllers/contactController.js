@@ -1,102 +1,60 @@
-// backend/controllers/contactController.js
 const Contact = require("../models/Contact");
-const resend = require("../config/transporter"); // Resend instance
+const sendEmail = require("../config/emailService");
 
-// Create new contact submission
+// Create new contact message
 exports.createContact = async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
 
-    if (!email || !message) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and message are required.",
-      });
-    }
+    if (!name || !email || !message)
+      return res.status(400).json({ error: "All required fields missing" });
 
-    // Save contact in DB
+    // Save to DB
     const contact = await Contact.create({ name, email, subject, message });
 
-    // Admin & user emails
-    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "ashrafigraphicservices@gmail.com";
-
-    // 📩 Admin notification email
-    const adminEmailHTML = `
-      <div style="font-family: Arial, sans-serif; padding: 20px;">
-        <h2>📥 New Contact Form Submission</h2>
-        <p><strong>Name:</strong> ${name || "N/A"}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject || "(none)"}</p>
-        <p><strong>Message:</strong></p>
-        <p style="background: #f9f9f9; padding: 10px; border-radius: 8px;">
-          ${message}
-        </p>
-        <hr/>
-        <p style="color:#777;">Sent via Ashrafi Graphic Website</p>
+    // Send confirmation to user
+    const userHtml = `
+      <div style="font-family: Arial; padding: 20px;">
+        <h2>Thank You, ${name}!</h2>
+        <p>We have received your message:</p>
+        <blockquote>${message}</blockquote>
+        <p>Our team will reach out to you shortly.</p>
+        <p>– Ashrafi Graphics Team</p>
       </div>
     `;
 
-    // 📧 User confirmation email
-    const userEmailHTML = `
-      <div style="font-family: Arial, sans-serif; padding: 20px;">
-        <h2>Thank you for contacting Ashrafi Graphics!</h2>
-        <p>Hi ${name || "there"},</p>
-        <p>We’ve received your message:</p>
-        <blockquote style="color:#555; border-left: 3px solid #FFD700; padding-left: 10px;">
-          ${message}
-        </blockquote>
-        <p>Our team will review your request and get back to you shortly.</p>
-        <p>Warm regards,<br/>Team Ashrafi Graphics 💛</p>
+    // Notify admin
+    const adminHtml = `
+      <div style="font-family: Arial; padding: 20px;">
+        <h2>📩 New Contact Form Submission</h2>
+        <p><b>Name:</b> ${name}</p>
+        <p><b>Email:</b> ${email}</p>
+        <p><b>Subject:</b> ${subject || "No subject"}</p>
+        <p><b>Message:</b> ${message}</p>
       </div>
     `;
 
-    // ✅ Send both emails via Resend
-    const results = await Promise.all([
-      resend.emails.send({
-        from: "Ashrafi Graphics <no-reply@ashrafigraphic.com>",
-        to: ADMIN_EMAIL,
-        subject: `📩 New Contact Message - ${subject || "No Subject"}`,
-        html: adminEmailHTML,
-      }),
-      resend.emails.send({
-        from: "Ashrafi Graphics <no-reply@ashrafigraphic.com>",
-        to: email,
-        subject: "✅ We’ve received your message",
-        html: userEmailHTML,
-      }),
-    ]);
-
-    console.log("✅ Contact emails sent:", results);
+    await sendEmail(email, "We received your message!", userHtml);
+    await sendEmail(process.env.EMAIL_REPLY_TO, `New Contact: ${name}`, adminHtml);
 
     res.status(201).json({
       success: true,
-      message: "Message submitted successfully.",
+      message: "Contact message submitted successfully",
       data: contact,
     });
-  } catch (error) {
-    console.error("❌ Contact form error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error submitting form. Please try again later.",
-      error: error.message,
-    });
+  } catch (err) {
+    console.error("❌ Contact error:", err);
+    res.status(500).json({ error: "Failed to submit contact form" });
   }
 };
 
-// Get all contact submissions (for admin)
+// Admin - fetch all contacts
 exports.getAllContacts = async (req, res) => {
   try {
     const contacts = await Contact.find().sort({ createdAt: -1 });
-    res.status(200).json({
-      success: true,
-      count: contacts.length,
-      data: contacts,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching contacts",
-      error: error.message,
-    });
+    res.json({ success: true, count: contacts.length, data: contacts });
+  } catch (err) {
+    console.error("❌ Get contacts error:", err);
+    res.status(500).json({ error: "Failed to fetch contacts" });
   }
 };
