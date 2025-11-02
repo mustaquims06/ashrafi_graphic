@@ -4,21 +4,13 @@ const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const { verifyToken } = require('../middleware/verifyToken');
+const { Resend } = require('resend');
+
 const router = express.Router();
-const nodemailer = require('nodemailer');
 
-// --- Email setup ---
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@example.com';
+// ✅ Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'ashrafigraphicservices@gmail.com';
 
 // --- Email Templates ---
 const createUserEmailTemplate = (order, user) => `
@@ -37,7 +29,7 @@ const createUserEmailTemplate = (order, user) => `
     <h3>Delivery Details:</h3>
     <p><strong>Phone:</strong> ${order.phone}</p>
     <p><strong>Address:</strong> ${order.address}</p>
-    <p>Payment Method: ${order.paymentMethod}</p>
+    <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
     <hr/>
     <p>We’ll notify you once your order is shipped. Thanks for shopping!</p>
   </div>
@@ -67,11 +59,9 @@ const createAdminEmailTemplate = (order, user) => `
 router.post('/', verifyToken, async (req, res) => {
   try {
     const { items, total, phone, address, paymentMethod } = req.body;
-
     const user = await User.findById(req.user._id).select("-password");
-    if (!user) {
-      return res.status(400).json({ error: 'User not found' });
-    }
+
+    if (!user) return res.status(400).json({ error: 'User not found' });
 
     const itemsWithIds = items.map(i => ({
       productId: mongoose.Types.ObjectId.isValid(i.productId)
@@ -95,24 +85,25 @@ router.post('/', verifyToken, async (req, res) => {
 
     const savedOrder = await newOrder.save();
 
-    // Send confirmation emails
+    // ✅ Send confirmation emails via Resend
     try {
       await Promise.all([
-        transporter.sendMail({
-          from: `"Ashrafi Graphic" <${process.env.EMAIL_USER}>`,
+        resend.emails.send({
+          from: 'Ashrafi Graphics <no-reply@ashrafigraphic.com>',
           to: user.email,
           subject: `Order Confirmation - #${savedOrder._id}`,
-          html: createUserEmailTemplate(savedOrder, user)
+          html: createUserEmailTemplate(savedOrder, user),
         }),
-        transporter.sendMail({
-          from: `"Ashrafi Graphic" <${process.env.EMAIL_USER}>`,
+        resend.emails.send({
+          from: 'Ashrafi Graphics <no-reply@ashrafigraphic.com>',
           to: ADMIN_EMAIL,
           subject: `🚨 New Order Received - #${savedOrder._id}`,
-          html: createAdminEmailTemplate(savedOrder, user)
-        })
+          html: createAdminEmailTemplate(savedOrder, user),
+        }),
       ]);
+      console.log(`✅ Order emails sent for ${savedOrder._id}`);
     } catch (emailError) {
-      console.error("❌ Email sending error:", emailError.message);
+      console.error("❌ Email sending error:", emailError);
     }
 
     res.status(201).json(savedOrder);
@@ -147,11 +138,8 @@ router.get('/:id', verifyToken, async (req, res) => {
       .populate('userId', 'username email')
       .populate('items.productId', 'name price images');
 
-    if (!order) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
+    if (!order) return res.status(404).json({ error: 'Order not found' });
 
-    // Only admin or owner can view
     if (!req.user.isAdmin && String(order.userId._id) !== String(req.user._id)) {
       return res.status(403).json({ error: 'Access denied' });
     }
