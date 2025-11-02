@@ -1,17 +1,16 @@
 // backend/routes/contact.js
 const express = require("express");
 const router = express.Router();
-const Contact = require("../models/Contact");
 const { Resend } = require("resend");
+const Contact = require("../models/Contact");
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// ✅ Contact form route
-router.post("/apply", async (req, res) => {
+// ✅ POST: /api/contact
+router.post("/", async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
 
-    // Validation
     if (!name || !email || !message) {
       return res.status(400).json({
         success: false,
@@ -19,46 +18,68 @@ router.post("/apply", async (req, res) => {
       });
     }
 
-    // 1️⃣ Save to MongoDB
+    // Save message to MongoDB
     const newContact = new Contact({
       name,
       email,
-      subject,
+      subject: subject || "No Subject",
       message,
       createdAt: new Date(),
     });
+
     const savedContact = await newContact.save();
     console.log("✅ Contact saved:", savedContact.email);
 
-    // 2️⃣ Send email to admin
-    await resend.emails.send({
-      from: "Ashrafi Graphics <no-reply@ashrafigraphic.com>",
-      to: process.env.ADMIN_EMAIL,
-      subject: `New Contact Form Submission - ${subject || "No subject"}`,
-      html: `
-        <h2>New Contact Submission</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject || "Not specified"}</p>
-        <p><strong>Message:</strong></p>
-        <div style="border-left:4px solid #007bff;padding:10px;">${message}</div>
-      `,
-    });
+    // 📨 Email to Admin
+    try {
+      await resend.emails.send({
+        from: "Ashrafi Graphics <onboarding@resend.dev>",
+        to: process.env.ADMIN_EMAIL,
+        subject: `New Contact Form - ${subject || "No Subject"}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 15px;">
+            <h2>📬 New Contact Message</h2>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Subject:</strong> ${subject || "N/A"}</p>
+            <p><strong>Message:</strong></p>
+            <blockquote style="border-left:4px solid #007bff;padding-left:10px;">
+              ${message}
+            </blockquote>
+          </div>
+        `,
+      });
 
-    // 3️⃣ Confirmation email to user
-    await resend.emails.send({
-      from: "Ashrafi Graphics <no-reply@ashrafigraphic.com>",
-      to: email,
-      subject: "Thank you for contacting Ashrafi Graphics",
-      html: `
-        <h2>Hi ${name},</h2>
-        <p>Thank you for reaching out to <strong>Ashrafi Graphics</strong>! We’ve received your message and will respond shortly.</p>
-        <p><strong>Your message:</strong></p>
-        <div style="border-left:4px solid #007bff;padding:10px;">${message}</div>
-        <br>
-        <p>Warm regards,<br>Team Ashrafi Graphics</p>
-      `,
-    });
+      console.log("✅ Admin email sent to:", process.env.ADMIN_EMAIL);
+    } catch (err) {
+      console.error("❌ Admin email send failed:", err.message);
+    }
+
+    // 📨 Auto-reply to User
+    try {
+      await resend.emails.send({
+        from: "Ashrafi Graphics <onboarding@resend.dev>",
+        to: email,
+        subject: "Thank you for contacting Ashrafi Graphics",
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 15px;">
+            <h2>Hi ${name},</h2>
+            <p>Thank you for reaching out to <strong>Ashrafi Graphics</strong>!</p>
+            <p>We have received your message and will get back to you shortly.</p>
+            <hr>
+            <p><strong>Your message:</strong></p>
+            <blockquote style="border-left:4px solid #22c55e;padding-left:10px;">
+              ${message}
+            </blockquote>
+            <p style="margin-top:20px;">Warm regards,<br><strong>Team Ashrafi Graphics</strong></p>
+          </div>
+        `,
+      });
+
+      console.log("✅ Confirmation email sent to:", email);
+    } catch (err) {
+      console.error("❌ User email send failed:", err.message);
+    }
 
     res.status(201).json({
       success: true,
