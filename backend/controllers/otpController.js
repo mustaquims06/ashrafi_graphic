@@ -1,50 +1,40 @@
-// backend/controllers/otpController.js
 const Otp = require("../models/Otp");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const resend = require("../config/transporter");
+const sendEmail = require("../config/emailService");
 
 // Send OTP
 exports.sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ error: "❌ Email is required" });
-    }
+    if (!email) return res.status(400).json({ error: "Email is required" });
 
-    // Generate OTP
+    // generate OTP
     const otp = crypto.randomInt(100000, 999999).toString();
 
-    // Remove old OTPs for same email
+    // delete old OTPs
     await Otp.deleteMany({ email });
 
-    // Save new OTP
-    await Otp.create({ email, otp, attempts: 1 });
+    // save new OTP
+    await Otp.create({ email, otp, createdAt: new Date() });
 
-    // Send via Resend
-    const { data, error } = await resend.emails.send({
-      from: "Ashrafi Graphics <no-reply@ashrafigraphic.com>",
-      to: email,
-      subject: "Your OTP Code - Ashrafi Graphics",
-      html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2>Verification Code</h2>
-          <p>Your OTP code is:</p>
-          <div style="font-size: 24px; font-weight: bold; color: #333; letter-spacing: 4px;">
-            ${otp}
-          </div>
-          <p>This code will expire in <strong>5 minutes</strong>.</p>
+    // email body
+    const html = `
+      <div style="font-family: Arial; padding: 20px;">
+        <h2>🔐 Your OTP Code</h2>
+        <p>Use this OTP to verify your account or reset your password:</p>
+        <div style="font-size: 28px; font-weight: bold; background: #f3f3f3; padding: 10px; text-align: center;">
+          ${otp}
         </div>
-      `,
-    });
+        <p>This code will expire in 5 minutes.</p>
+        <p>– Ashrafi Graphics</p>
+      </div>
+    `;
 
-    if (error) {
-      console.error("❌ Resend error:", error);
-      return res.status(500).json({ error: "Failed to send OTP" });
-    }
+    await sendEmail(email, "Your OTP Code - Ashrafi Graphics", html);
+    console.log(`✅ Generated OTP: ${otp} for ${email}`);
 
-    console.log(`✅ OTP sent to ${email}`);
     res.json({ message: "✅ OTP sent successfully" });
   } catch (err) {
     console.error("❌ Send OTP error:", err);
@@ -56,20 +46,23 @@ exports.sendOtp = async (req, res) => {
 exports.verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    const record = await Otp.findOne({ email });
+    if (!email || !otp)
+      return res.status(400).json({ error: "Email and OTP are required" });
 
-    if (!record) return res.status(400).json({ error: "❌ Invalid or expired OTP" });
+    const record = await Otp.findOne({ email });
+    if (!record) return res.status(400).json({ error: "Invalid or expired OTP" });
 
     if (record.otp !== otp) {
-      return res.status(400).json({ error: "❌ Incorrect OTP" });
+      return res.status(400).json({ error: "Invalid OTP" });
     }
 
-    // Delete after verification
+    // delete OTP after success
     await Otp.deleteOne({ _id: record._id });
 
-    const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "10m" });
+    // issue token for password reset or verification
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "10m" });
 
-    res.json({ message: "✅ OTP verified", resetToken });
+    res.json({ message: "✅ OTP verified successfully", token });
   } catch (err) {
     console.error("❌ Verify OTP error:", err);
     res.status(500).json({ error: "OTP verification failed" });
