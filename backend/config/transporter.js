@@ -1,19 +1,22 @@
-const nodemailer = require("nodemailer");
+// backend/config/transporter.js
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    ciphers: 'SSLv3',
-    rejectUnauthorized: false
+// Initialize Resend client
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// ✅ Test connection (optional)
+(async () => {
+  try {
+    const response = await resend.emails.send({
+      from: "Ashrafi Graphics <onboarding@resend.dev>",
+      to: process.env.ADMIN_EMAIL,
+      subject: "✅ Resend Setup Verified",
+      html: "<p>Your Resend configuration is working perfectly!</p>",
+    });
+    console.log("✅ Resend email test sent successfully:", response.id);
+  } catch (error) {
+    console.error("⚠️ Resend configuration test failed:", error.message);
   }
-});
+})();
 
-module.exports = transporter;
-
-
+module.exports = resend;
