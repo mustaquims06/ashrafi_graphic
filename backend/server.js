@@ -20,7 +20,8 @@ app.use(
     origin: [ 'https://ashrafigraphic.com',      // ✅ Your domain
     'http://ashrafigraphic.com',       // ✅ HTTP version
     'https://www.ashrafigraphic.com',  // ✅ WWW version
-    'http://www.ashrafigraphic.com', ],  // ✅ WWW HTTP version
+    'http://www.ashrafigraphic.com',
+     'https://ashrafi-graphic.onrender.com'       ],  // ✅ WWW HTTP version
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
