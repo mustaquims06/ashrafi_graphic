@@ -1,153 +1,83 @@
-// backend/routes/orders.js
-const express = require('express');
-const mongoose = require('mongoose');
-const Order = require('../models/Order');
-const User = require('../models/User');
-const { verifyToken } = require('../middleware/verifyToken');
-const { Resend } = require('resend');
+const express = require("express");
+const mongoose = require("mongoose");
+const Order = require("../models/Order");
+const User = require("../models/User");
+const { verifyToken } = require("../middleware/verifyToken");
+const sendEmail = require("../config/emailService");
 
 const router = express.Router();
 
-// ✅ Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'ashrafigraphicservices@gmail.com';
-
-// --- Email Templates ---
+// Email templates
 const createUserEmailTemplate = (order, user) => `
-  <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-    <h2>Hi ${user.username || "Customer"},</h2>
-    <p>Thank you for your order with <strong>Ashrafi Graphic</strong>!</p>
-    <p><strong>Order ID:</strong> ${order._id}</p>
-    <p><strong>Total:</strong> ₹${order.total}</p>
-    <h3>Items:</h3>
+  <div style="font-family: Arial;">
+    <h2>Thanks for your order, ${user.username || "Customer"}!</h2>
+    <p>Your order has been placed successfully.</p>
+    <p><b>Order ID:</b> ${order._id}</p>
+    <p><b>Total:</b> ₹${order.total}</p>
     <ul>
       ${order.items.map(
-        (i) => `<li>${i.name} × ${i.quantity} — ₹${i.price * i.quantity}
-        ${i.selectedSize ? `(Size: ${i.selectedSize})` : ""}</li>`
+        (i) => `<li>${i.name} × ${i.quantity} — ₹${i.price * i.quantity}</li>`
       ).join("")}
     </ul>
-    <h3>Delivery Details:</h3>
-    <p><strong>Phone:</strong> ${order.phone}</p>
-    <p><strong>Address:</strong> ${order.address}</p>
-    <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
-    <hr/>
-    <p>We’ll notify you once your order is shipped. Thanks for shopping!</p>
+    <p>We’ll notify you once it’s shipped.</p>
+    <p>– Ashrafi Graphics Team</p>
   </div>
 `;
 
 const createAdminEmailTemplate = (order, user) => `
-  <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+  <div style="font-family: Arial;">
     <h2>🚨 New Order Received</h2>
-    <p><strong>Customer:</strong> ${user.email}</p>
-    <p><strong>Order ID:</strong> ${order._id}</p>
-    <p><strong>Total:</strong> ₹${order.total}</p>
-    <h3>Items:</h3>
+    <p><b>Customer:</b> ${user.email}</p>
+    <p><b>Total:</b> ₹${order.total}</p>
+    <p><b>Items:</b></p>
     <ul>
       ${order.items.map(
-        (i) => `<li>${i.name} × ${i.quantity} — ₹${i.price * i.quantity}
-        ${i.selectedSize ? `(Size: ${i.selectedSize})` : ""}</li>`
+        (i) => `<li>${i.name} × ${i.quantity} — ₹${i.price * i.quantity}</li>`
       ).join("")}
     </ul>
-    <h3>Delivery Info:</h3>
-    <p>Phone: ${order.phone}</p>
-    <p>Address: ${order.address}</p>
-    <p>Payment Method: ${order.paymentMethod}</p>
   </div>
 `;
 
-// --- Create Order ---
-router.post('/', verifyToken, async (req, res) => {
+// Create new order
+router.post("/", verifyToken, async (req, res) => {
   try {
     const { items, total, phone, address, paymentMethod } = req.body;
     const user = await User.findById(req.user._id).select("-password");
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-    if (!user) return res.status(400).json({ error: 'User not found' });
-
-    const itemsWithIds = items.map(i => ({
-      productId: mongoose.Types.ObjectId.isValid(i.productId)
-        ? new mongoose.Types.ObjectId(i.productId)
-        : undefined,
+    const formattedItems = items.map((i) => ({
       name: i.name,
       price: i.price,
-      quantity: i.quantity || 1,
-      selectedSize: i.selectedSize || null
+      quantity: i.quantity,
+      selectedSize: i.selectedSize || null,
     }));
 
-    const newOrder = new Order({
+    const order = await Order.create({
       userId: user._id,
       userEmail: user.email,
-      items: itemsWithIds,
+      items: formattedItems,
       total,
       phone,
       address,
-      paymentMethod
+      paymentMethod,
     });
 
-    const savedOrder = await newOrder.save();
+    await sendEmail(
+      user.email,
+      `Order Confirmation - #${order._id}`,
+      createUserEmailTemplate(order, user)
+    );
 
-    // ✅ Send confirmation emails via Resend
-    try {
-      await Promise.all([
-        resend.emails.send({
-          from: 'Ashrafi Graphics <no-reply@ashrafigraphic.com>',
-          to: user.email,
-          subject: `Order Confirmation - #${savedOrder._id}`,
-          html: createUserEmailTemplate(savedOrder, user),
-        }),
-        resend.emails.send({
-          from: 'Ashrafi Graphics <no-reply@ashrafigraphic.com>',
-          to: ADMIN_EMAIL,
-          subject: `🚨 New Order Received - #${savedOrder._id}`,
-          html: createAdminEmailTemplate(savedOrder, user),
-        }),
-      ]);
-      console.log(`✅ Order emails sent for ${savedOrder._id}`);
-    } catch (emailError) {
-      console.error("❌ Email sending error:", emailError);
-    }
+    await sendEmail(
+      process.env.EMAIL_REPLY_TO,
+      `🚨 New Order from ${user.email}`,
+      createAdminEmailTemplate(order, user)
+    );
 
-    res.status(201).json(savedOrder);
+    res.status(201).json(order);
   } catch (err) {
-    console.error('❌ Order creation error:', err.message);
-    res.status(400).json({ error: 'Order failed', details: err.message });
-  }
-});
-
-// --- Get All Orders ---
-router.get('/', verifyToken, async (req, res) => {
-  try {
-    let orders;
-    if (req.user.isAdmin) {
-      orders = await Order.find()
-        .populate('userId', 'username email')
-        .sort({ date: -1 });
-    } else {
-      orders = await Order.find({ userId: req.user._id }).sort({ date: -1 });
-    }
-    res.json(orders);
-  } catch (err) {
-    console.error('❌ Fetch orders error:', err.message);
-    res.status(500).json({ error: 'Could not fetch orders' });
-  }
-});
-
-// --- Get Single Order ---
-router.get('/:id', verifyToken, async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id)
-      .populate('userId', 'username email')
-      .populate('items.productId', 'name price images');
-
-    if (!order) return res.status(404).json({ error: 'Order not found' });
-
-    if (!req.user.isAdmin && String(order.userId._id) !== String(req.user._id)) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-
-    res.json(order);
-  } catch (err) {
-    console.error('❌ Fetch single order error:', err.message);
-    res.status(500).json({ error: 'Could not fetch order' });
+    console.error("❌ Order error:", err);
+    res.status(500).json({ error: "Failed to place order" });
   }
 });
 
