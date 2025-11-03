@@ -27,37 +27,36 @@ router.post("/", verifyToken, async (req, res) => {
 
     const savedOrder = await newOrder.save();
 
-    // Send mail to user
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM,
-      to: user.email,
-      subject: `✅ Order Confirmation - Ashrafi Graphics`,
-      html: `
-        <div style="font-family:Arial; padding:20px;">
-          <h2>Thank you for your order, ${user.username || "Customer"}!</h2>
-          <p><b>Order ID:</b> ${savedOrder._id}</p>
-          <p><b>Total:</b> ₹${savedOrder.total}</p>
-          <p>We'll notify you once it's shipped.</p>
-        </div>
-      `
-    });
+   // after order save (inside try block)
+await Promise.all([
+  resend.emails.send({
+    from: `Ashrafi Graphic <${process.env.EMAIL_FROM}>`,
+    to: user.email,
+    subject: `Order Confirmation - #${savedOrder._id}`,
+    html: `
+      <div style="font-family: Arial; padding: 20px;">
+        <h2>Thank You for Your Order, ${user.username || "Customer"}!</h2>
+        <p><b>Order ID:</b> ${savedOrder._id}</p>
+        <p><b>Total:</b> ₹${savedOrder.total}</p>
+        <p>We’ll notify you once your order is shipped.</p>
+      </div>
+    `,
+  }),
 
-    // Send mail to admin
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM,
-      to: process.env.ADMIN_EMAIL,
-      subject: `🚨 New Order Received - ${user.email}`,
-      html: `
-        <div style="font-family:Arial; padding:20px;">
-          <h2>New Order Received</h2>
-          <p><b>Customer:</b> ${user.email}</p>
-          <p><b>Total:</b> ₹${savedOrder.total}</p>
-          <p><b>Payment:</b> ${savedOrder.paymentMethod}</p>
-        </div>
-      `
-    });
-
-    res.status(201).json(savedOrder);
+  resend.emails.send({
+    from: `Ashrafi Graphic <${process.env.EMAIL_FROM}>`,
+    to: process.env.ADMIN_EMAIL,
+    subject: `🚨 New Order Received - #${savedOrder._id}`,
+    html: `
+      <div style="font-family: Arial; padding: 20px;">
+        <h2>🚨 New Order Received</h2>
+        <p><b>Customer:</b> ${user.email}</p>
+        <p><b>Total:</b> ₹${savedOrder.total}</p>
+      </div>
+    `,
+  })
+]);
+res.status(201).json(savedOrder);
 
   } catch (err) {
     console.error("❌ Order Error:", err);
