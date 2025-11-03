@@ -29,13 +29,12 @@ router.post("/signup-request", async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    // Create Temp User
+    // Save temp user
     const hashedPassword = await bcrypt.hash(password, 10);
     await TempUser.deleteMany({ email });
     await TempUser.create({
@@ -51,37 +50,31 @@ router.post("/signup-request", async (req, res) => {
     await Otp.deleteMany({ email });
     await Otp.create({ email, otp });
 
-    console.log("✅ Generated OTP:", otp, "for", email);
+    console.log("✅ Signup OTP:", otp, "for", email);
 
-    // Send OTP email using Resend
-    try {
-      await resend.emails.send({
-        from: "Ashrafi Graphics <onboarding@resend.dev>",
-        to: email,
-        subject: "Ashrafi Graphics - Signup OTP",
-        html: `
-          <div style="font-family: Arial, sans-serif; padding: 15px;">
-            <h2>Welcome to Ashrafi Graphics</h2>
-            <p>Use the OTP below to verify your signup:</p>
-            <h1 style="letter-spacing: 5px; color: #22c55e;">${otp}</h1>
-            <p>This OTP expires in <strong>5 minutes</strong>.</p>
-          </div>
-        `,
-      });
+    // Send email
+    await resend.emails.send({
+      from: "Ashrafi Graphics <noreply@ashrafigraphic.com>",
+      to: email,
+      subject: "Ashrafi Graphics - Signup OTP",
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 15px;">
+          <h2>Welcome to Ashrafi Graphics</h2>
+          <p>Use the OTP below to verify your signup:</p>
+          <h1 style="letter-spacing: 5px; color: #22c55e;">${otp}</h1>
+          <p>This OTP expires in <strong>5 minutes</strong>.</p>
+        </div>
+      `,
+    });
 
-      console.log("✅ OTP email sent successfully to", email);
-    } catch (err) {
-      console.error("❌ Email send failed:", err.message);
-    }
-
-    res.json({ message: "✅ OTP sent successfully. Please verify to continue." });
+    res.json({ message: "✅ Signup OTP sent successfully." });
   } catch (err) {
     console.error("Signup request error:", err.message);
     res.status(500).json({ message: "Server error while processing signup." });
   }
 });
 
-// ✅ Verify OTP & Create Final User
+// ✅ Verify Signup OTP & Create User
 router.post("/signup-verify", async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -106,8 +99,8 @@ router.post("/signup-verify", async (req, res) => {
       address: tempUser.address,
       isAdmin: false,
     });
-    const savedUser = await newUser.save();
 
+    const savedUser = await newUser.save();
     await TempUser.deleteOne({ email });
 
     const token = generateToken(savedUser);
@@ -156,7 +149,13 @@ router.post("/login", async (req, res) => {
       isAdmin: user.isAdmin,
       token,
     });
-    // ✅ Forgot Password: Send OTP via Resend
+  } catch (err) {
+    console.error("Login error:", err.message);
+    res.status(500).json({ message: "Server error during login." });
+  }
+});
+
+// ✅ Forgot Password: Send OTP via Resend
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
@@ -164,12 +163,10 @@ router.post("/forgot-password", async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "User not found" });
 
-    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     await Otp.deleteMany({ email });
     await Otp.create({ email, otp });
 
-    // Send email via Resend
     await resend.emails.send({
       from: "Ashrafi Graphics <noreply@ashrafigraphic.com>",
       to: email,
@@ -183,31 +180,33 @@ router.post("/forgot-password", async (req, res) => {
           <p>If you didn’t request this, please ignore this email.</p>
           <p>– Ashrafi Graphics Team</p>
         </div>
-      `
+      `,
     });
 
     console.log(`✅ Reset OTP sent to ${email}: ${otp}`);
     res.json({ message: "✅ OTP sent successfully to your email" });
-
   } catch (err) {
     console.error("Forgot password error:", err.message);
     res.status(500).json({ message: "Failed to send reset OTP" });
   }
 });
 
-// ✅ Verify OTP & Allow Password Reset
+// ✅ Verify Reset OTP
 router.post("/verify-reset-otp", async (req, res) => {
   try {
     const { email, otp } = req.body;
-    const record = await Otp.findOne({ email });
 
+    const record = await Otp.findOne({ email });
     if (!record || record.otp !== otp)
       return res.status(400).json({ message: "Invalid or expired OTP" });
 
     await Otp.deleteMany({ email });
 
-    // Generate temporary token (10 min validity)
-    const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "10m" });
+    // Generate temporary reset token
+    const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, {
+      expiresIn: "10m",
+    });
+
     res.json({ message: "✅ OTP verified successfully", resetToken });
   } catch (err) {
     console.error("Verify reset OTP error:", err.message);
@@ -224,23 +223,18 @@ router.post("/reset-password", async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Verify JWT reset token
     let decoded;
     try {
       decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
-    } catch (err) {
+    } catch {
       return res.status(400).json({ message: "❌ Invalid or expired reset token" });
     }
 
-    // Ensure token email matches request email
     if (decoded.email !== email) {
       return res.status(400).json({ message: "❌ Email mismatch" });
     }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update user password
     const user = await User.findOneAndUpdate(
       { email },
       { password: hashedPassword },
@@ -255,13 +249,6 @@ router.post("/reset-password", async (req, res) => {
   } catch (err) {
     console.error("Reset password error:", err);
     res.status(500).json({ message: "Server error during password reset." });
-  }
-});
-
-
-  } catch (err) {
-    console.error("Login error:", err.message);
-    res.status(500).json({ message: "Server error during login." });
   }
 });
 
