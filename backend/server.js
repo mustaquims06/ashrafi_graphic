@@ -86,24 +86,6 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-// 🔹 Test Resend Mail API Route
-const { Resend } = require("resend");
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-app.get("/test-mail", async (req, res) => {
-  try {
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM,
-      to: "yourmail@gmail.com", // ← apna email yahan likho
-      subject: "Resend Test",
-      html: "<h1>✅ Resend working perfectly!</h1>",
-    });
-    res.send("Mail sent!");
-  } catch (err) {
-    console.error("❌ Resend Test Error:", err);
-    res.status(500).send(err);
-  }
-});
 
 // ✅ MongoDB Connection
 mongoose
