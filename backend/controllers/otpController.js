@@ -1,11 +1,15 @@
+const Otp = require("../models/Otp"); // ✅ Missing import added
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const { Resend } = require("resend");
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// ✅ Send OTP
 exports.sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
+    const otp = crypto.randomInt(100000, 999999).toString();
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
     console.log("✅ Generated OTP:", otp, "for", email);
 
     await Otp.deleteMany({ email });
@@ -13,7 +17,7 @@ exports.sendOtp = async (req, res) => {
 
     // Send OTP Email using Resend
     await resend.emails.send({
-      from: `Ashrafi Graphic <noreply@ashrafigraphic.com>`, // verified domain
+      from: `Ashrafi Graphic <noreply@ashrafigraphic.com>`,
       to: email,
       subject: "Your OTP Code - Ashrafi Graphic",
       html: `
@@ -24,7 +28,6 @@ exports.sendOtp = async (req, res) => {
             ${otp}
           </div>
           <p>This OTP is valid for 5 minutes.</p>
-          <br/>
           <p>— Team Ashrafi Graphic</p>
         </div>
       `
@@ -34,5 +37,24 @@ exports.sendOtp = async (req, res) => {
   } catch (err) {
     console.error("❌ OTP Send Error:", err);
     res.status(500).json({ error: "Failed to send OTP email" });
+  }
+};
+
+// ✅ Verify OTP
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const record = await Otp.findOne({ email });
+
+    if (!record) return res.status(400).json({ error: "Invalid or expired OTP" });
+    if (record.otp !== otp) return res.status(400).json({ error: "Incorrect OTP" });
+
+    await Otp.deleteOne({ _id: record._id });
+
+    const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "10m" });
+    res.json({ message: "✅ OTP verified", resetToken });
+  } catch (err) {
+    console.error("❌ OTP Verify Error:", err);
+    res.status(500).json({ error: "OTP verification failed" });
   }
 };
