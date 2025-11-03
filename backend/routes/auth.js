@@ -156,6 +156,95 @@ router.post("/login", async (req, res) => {
       isAdmin: user.isAdmin,
       token,
     });
+    // ✅ Forgot Password: Send OTP via Resend
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "User not found" });
+
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    await Otp.deleteMany({ email });
+    await Otp.create({ email, otp });
+
+    // Send email via Resend
+    await resend.emails.send({
+      from: "Ashrafi Graphics <noreply@ashrafigraphic.com>",
+      to: email,
+      subject: "Password Reset OTP - Ashrafi Graphics",
+      html: `
+        <div style="font-family: Arial; padding: 20px;">
+          <h2>🔐 Password Reset Request</h2>
+          <p>Use the OTP below to reset your password:</p>
+          <h1 style="letter-spacing: 4px;">${otp}</h1>
+          <p>This OTP is valid for 5 minutes.</p>
+          <p>If you didn’t request this, please ignore this email.</p>
+          <p>– Ashrafi Graphics Team</p>
+        </div>
+      `
+    });
+
+    console.log(`✅ Reset OTP sent to ${email}: ${otp}`);
+    res.json({ message: "✅ OTP sent successfully to your email" });
+
+  } catch (err) {
+    console.error("Forgot password error:", err.message);
+    res.status(500).json({ message: "Failed to send reset OTP" });
+  }
+});
+
+// ✅ Verify OTP & Allow Password Reset
+router.post("/verify-reset-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const record = await Otp.findOne({ email });
+
+    if (!record || record.otp !== otp)
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+
+    await Otp.deleteMany({ email });
+
+    // Generate temporary token (10 min validity)
+    const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "10m" });
+    res.json({ message: "✅ OTP verified successfully", resetToken });
+  } catch (err) {
+    console.error("Verify reset OTP error:", err.message);
+    res.status(500).json({ message: "Server error during OTP verification" });
+  }
+});
+
+// ✅ Reset Password (final step)
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword)
+      return res.status(400).json({ message: "Missing token or new password" });
+
+    // Verify token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+
+    const user = await User.findOne({ email: decoded.email });
+    if (!user) return res.status(400).json({ message: "User not found" });
+
+    // Hash and update new password
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+    await user.save();
+
+    res.json({ message: "✅ Password reset successful" });
+  } catch (err) {
+    console.error("Reset password error:", err.message);
+    res.status(500).json({ message: "Server error resetting password" });
+  }
+});
+
   } catch (err) {
     console.error("Login error:", err.message);
     res.status(500).json({ message: "Server error during login." });
