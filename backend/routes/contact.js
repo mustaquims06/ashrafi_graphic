@@ -33,7 +33,7 @@ router.post("/", async (req, res) => {
     // 📨 Email to Admin
     try {
       await resend.emails.send({
-        from: "Ashrafi Graphics <onboarding@resend.dev>",
+        from: "Ashrafi Graphics <noreply@ashrafigraphic.com>",
         to: process.env.ADMIN_EMAIL,
         subject: `New Contact Form - ${subject || "No Subject"}`,
         html: `
@@ -58,7 +58,7 @@ router.post("/", async (req, res) => {
     // 📨 Auto-reply to User
     try {
       await resend.emails.send({
-        from: "Ashrafi Graphics <onboarding@resend.dev>",
+        from: "Ashrafi Graphics <noreply@ashrafigraphic.com>",
         to: email,
         subject: "Thank you for contacting Ashrafi Graphics",
         html: `
