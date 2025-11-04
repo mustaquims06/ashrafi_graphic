@@ -1,4 +1,3 @@
-// backend/middleware/verifyToken.js
 const mongoose = require('mongoose');
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -149,6 +148,13 @@ const optionalVerifyToken = async (req, res, next) => {
   }
 };
 
+/**
+ * ✅ NEW: safeAdminRoute()
+ * Wraps verifyToken + verifyAdmin in a single easy call
+ * Example: router.get("/users", safeAdminRoute, handler)
+ */
+const safeAdminRoute = [verifyToken, verifyAdmin];
+
 module.exports = {
   verifyToken,
   verifyAdmin,
@@ -157,4 +163,5 @@ module.exports = {
   // New helpers (added, nothing removed)
   verifyAdminFlexible,
   verifySelfOrAdmin,
+  safeAdminRoute, // ✅ added helper
 };
